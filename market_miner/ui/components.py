@@ -23,8 +23,8 @@ class ConfigurationPanel:
         self.from_var = tk.StringVar(value="1")
         self.to_var = tk.StringVar(value="100")
         self.thread_var = tk.StringVar(value="6")
-        self.output_file_var = tk.StringVar(value="items.csv")
-        self.cross_server_output_var = tk.StringVar(value="cross_server_items.csv")
+        self.output_file_var = tk.StringVar(value="output/items.csv")
+        self.cross_server_output_var = tk.StringVar(value="output/cross_server_items.csv")
 
         # UI components that need to be accessed later
         self.server_combo = None
@@ -92,35 +92,31 @@ class ConfigurationPanel:
         thread_entry = ctk.CTkEntry(self.frame, textvariable=self.thread_var, width=80)
         thread_entry.grid(row=4, column=1, sticky='w', padx=(0, 20), pady=5)
         
-        # Output file
-        ctk.CTkLabel(self.frame, text="Output File:", 
+
+        # Output folder selection (for both CSVs)
+        ctk.CTkLabel(self.frame, text="Output Folder:",
                     font=ctk.CTkFont(size=12)).grid(
             row=5, column=0, sticky='w', padx=(20, 10), pady=5)
-        
-        file_frame = ctk.CTkFrame(self.frame)
-        file_frame.grid(row=5, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
-        file_frame.grid_columnconfigure(0, weight=1)
-        
-        file_entry = ctk.CTkEntry(file_frame, textvariable=self.output_file_var)
-        file_entry.grid(row=0, column=0, sticky='ew', padx=(10, 5), pady=10)
-        
-        self.browse_btn = ctk.CTkButton(file_frame, text="📁 Browse", width=100)
+
+        folder_frame = ctk.CTkFrame(self.frame)
+        folder_frame.grid(row=5, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
+        folder_frame.grid_columnconfigure(0, weight=1)
+
+        # Show the folder path (not the file)
+        import os
+        def folder_from_path(path):
+            if not path:
+                return "output"
+            return os.path.dirname(path) if os.path.dirname(path) else path
+        self.output_folder_var = tk.StringVar(value=folder_from_path(self.output_file_var.get()))
+        folder_entry = ctk.CTkEntry(folder_frame, textvariable=self.output_folder_var, state="readonly")
+        folder_entry.grid(row=0, column=0, sticky='ew', padx=(10, 5), pady=10)
+
+        self.browse_btn = ctk.CTkButton(folder_frame, text="📁 Browse", width=100)
         self.browse_btn.grid(row=0, column=1, padx=(5, 10), pady=10)
-        
-        # Output file for cross-server
-        ctk.CTkLabel(self.frame, text="Output File (Cross-Server):",
-                    font=ctk.CTkFont(size=12)).grid(
-            row=6, column=0, sticky='w', padx=(20, 10), pady=5)
 
-        cross_server_file_frame = ctk.CTkFrame(self.frame)
-        cross_server_file_frame.grid(row=6, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
-        cross_server_file_frame.grid_columnconfigure(0, weight=1)
-
-        cross_server_file_entry = ctk.CTkEntry(cross_server_file_frame, textvariable=self.cross_server_output_var)
-        cross_server_file_entry.grid(row=0, column=0, sticky='ew', padx=(10, 5), pady=10)
-
-        self.cross_server_browse_btn = ctk.CTkButton(cross_server_file_frame, text="📁 Browse", width=100)
-        self.cross_server_browse_btn.grid(row=0, column=1, padx=(5, 10), pady=10)
+        # Hide cross-server output file UI (now handled by folder)
+        self.cross_server_browse_btn = self.browse_btn
 
         return self.frame
     

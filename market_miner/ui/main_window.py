@@ -2,24 +2,30 @@
 Main window for MarketMiner Pro using CustomTkinter
 """
 
+
+
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import csv
 import threading
 import time
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .theme import ModernTheme
 from .components import ConfigurationPanel, ProgressTab, ResultsTab, CrossServerResultsTab, LogTab
 from ..scraper import MarketMinerScraper
 from ..servers import SERVERS
+from ..config import load_config, save_config
 
 
 class MarketMinerGUI:
     """Main GUI application for MarketMiner Pro using CustomTkinter"""
 
     def __init__(self, root):
+        # Load user config
+        self._user_config = load_config()
         # Initialize theme first
         self.theme = ModernTheme()
         self.theme.apply_theme()
@@ -49,6 +55,16 @@ class MarketMinerGUI:
         self.status = None
 
         self.setup_ui()
+
+        # Restore last used server and output path if available
+        last_server = self._user_config.get("last_server")
+        if last_server and last_server in SERVERS:
+            self.config_panel.server_var.set(last_server)
+            self.config_panel.selected_servers = [last_server]
+            self.config_panel._update_server_display()
+        last_output = self._user_config.get("output_path")
+        if last_output:
+            self.config_panel.output_file_var.set(last_output)
 
     def setup_ui(self):
         """Setup the main UI layout using CustomTkinter"""
@@ -221,23 +237,31 @@ class MarketMinerGUI:
         }
 
     def browse_output_file(self):
-        """Open file dialog to select output file"""
-        filename = filedialog.asksaveasfilename(
-            defaultextension=".csv",
-            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
-        )
-        if filename:
-            self.config_panel.output_file_var.set(filename)
+        """Open directory dialog to select output folder for CSV files"""
+        import os
+        default_dir = "output"
+        # Try to use the current folder if set
+        current = self.config_panel.output_file_var.get()
+        if current:
+            current_dir = os.path.dirname(current)
+            if os.path.isdir(current_dir):
+                default_dir = current_dir
+        folder = filedialog.askdirectory(title="Select Output Folder", initialdir=default_dir)
+        if folder:
+            output_file = os.path.join(folder, "items.csv")
+            cross_server_file = os.path.join(folder, "cross_server_items.csv")
+            self.config_panel.output_file_var.set(output_file)
+            self.config_panel.cross_server_output_var.set(cross_server_file)
+            # Update folder display
+            if hasattr(self.config_panel, "output_folder_var"):
+                self.config_panel.output_folder_var.set(folder)
+            # Save output folder to config
+            self._user_config["output_path"] = output_file
+            save_config(self._user_config)
 
     def browse_cross_server_output_file(self):
-        """Open file dialog to select cross-server output file"""
-        filename = filedialog.asksaveasfilename(
-            defaultextension=".csv",
-            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
-            title="Select Cross-Server Output File"
-        )
-        if filename:
-            self.config_panel.cross_server_output_var.set(filename)
+        """Open directory dialog to select output folder for CSV files (syncs both outputs)"""
+        self.browse_output_file()
 
     def log(self, message, level="info"):
         """Add message to log with status updates"""
@@ -273,6 +297,13 @@ class MarketMinerGUI:
         except ValueError:
             messagebox.showerror("Error", "Please enter valid numbers")
             return
+
+        # Save current server and output path to config
+        selected_servers = self.config_panel.get_selected_servers()
+        if selected_servers:
+            self._user_config["last_server"] = selected_servers[0]
+        self._user_config["output_path"] = self.config_panel.get_output_file()
+        save_config(self._user_config)
 
         # Update UI state
         self.is_running = True
