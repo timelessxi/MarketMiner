@@ -1,0 +1,23 @@
+itemid,name,category,lowest_price,lowest_server,highest_price,highest_server,average_price,price_difference,server_count
+86,San d'Orian Tree,Furnishings,10000,Bismarck,20000,Bahamut,15000,10000,3
+87,Kadomatsu,Furnishings,500,Bismarck,5000,Asura,2167,4500,3
+90,Rusty Bucket,Furnishings,200,Bismarck,2000,Asura,1067,1800,3
+91,Blue Pitcher,Furnishings,2500,Asura,10000,Bahamut,7500,7500,3
+92,Tarutaru Stool,Furnishings,1000,Bahamut,5000,Asura,2333,4000,3
+93,Water Cask,Furnishings,1000,Asura,1000,Asura,1000,0,3
+95,Water Barrel,Furnishings,10000,Bismarck,80000,Asura,33333,70000,3
+96,Beverage Barrel,Furnishings,10000,Bahamut,30000,Bismarck,16667,20000,3
+97,Book Holder,Furnishings,1000,Bismarck,10000,Asura,7000,9000,3
+98,Scimitar Cactus,Furnishings,10000,Bismarck,10000,Bismarck,10000,0,3
+99,Elshimo Palm,Furnishings,10000,Asura,10000,Asura,10000,0,3
+100,Okadomatsu,Unknown,1000,Asura,50000,Bahamut,17333,49000,3
+102,Flower Stand,Furnishings,1000,Bismarck,10000,Asura,7000,9000,3
+103,Goldfish Bowl,Furnishings,40000,Bismarck,200000,Bahamut,113333,160000,3
+104,Taru F. Screen,Furnishings,3000,Bismarck,5000,Bahamut,4000,2000,3
+107,Water Jug,Furnishings,1000,Asura,1000,Asura,1000,0,3
+110,White Jar,Furnishings,1000,Bahamut,110000,Asura,37667,109000,3
+112,Yellow Jar,Furnishings,1000,Asura,1000,Asura,1000,0,3
+113,Cleaning Tool Set,Furnishings,5000,Bahamut,10000,Asura,6667,5000,3
+115,Bastokan Tree,Furnishings,5000,Bismarck,20000,Bahamut,11667,15000,3
+116,Windurstian Tree,Furnishings,5000,Bismarck,20000,Bahamut,11667,15000,3
+120,F. Aquarium,Furnishings,10000,Bahamut,30000,Asura,16667,20000,3

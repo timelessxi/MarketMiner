@@ -19,7 +19,7 @@ class ConfigurationPanel:
         
         # Variables
         self.server_var = tk.StringVar(value="Asura")
-        self.cross_server_var = tk.BooleanVar(value=False)
+        self.selected_servers = ["Asura"]  # List of selected servers
         self.from_var = tk.StringVar(value="1")
         self.to_var = tk.StringVar(value="100")
         self.thread_var = tk.StringVar(value="6")
@@ -42,21 +42,30 @@ class ConfigurationPanel:
         header.grid(row=0, column=0, columnspan=2, sticky='w', padx=20, pady=(20, 10))
         
         # Server selection
-        ctk.CTkLabel(self.frame, text="Server Mode:", 
+        ctk.CTkLabel(self.frame, text="Servers:", 
                     font=ctk.CTkFont(size=12)).grid(
             row=1, column=0, sticky='w', padx=(20, 10), pady=(10, 5))
         
-        # Cross-server analysis checkbox
-        cross_server_cb = ctk.CTkCheckBox(self.frame, text="Cross-Server Analysis (All Servers)", 
-                                         variable=self.cross_server_var,
-                                         command=self._toggle_server_mode)
-        cross_server_cb.grid(row=1, column=1, sticky='w', padx=(0, 20), pady=(10, 5))
+        # Server selection frame
+        server_frame = ctk.CTkFrame(self.frame)
+        server_frame.grid(row=1, column=1, sticky='ew', padx=(0, 20), pady=(10, 5))
+        server_frame.grid_columnconfigure(0, weight=1)
         
-        # Single server selection
-        self.server_combo = ctk.CTkComboBox(self.frame, variable=self.server_var, 
+        # Single server dropdown (default)
+        self.server_combo = ctk.CTkComboBox(server_frame, variable=self.server_var, 
                                            values=list(SERVERS.keys()), 
                                            state="readonly", width=160)
-        self.server_combo.grid(row=2, column=1, sticky='ew', padx=(0, 20), pady=(5, 5))
+        self.server_combo.grid(row=0, column=0, sticky='w', padx=10, pady=5)
+        
+        # Multi-server button
+        self.multi_server_btn = ctk.CTkButton(server_frame, text="Select Multiple Servers", 
+                                             command=self._show_server_selection,
+                                             width=150, height=28)
+        self.multi_server_btn.grid(row=0, column=1, sticky='e', padx=10, pady=5)
+        
+        # Selected servers label (initially hidden)
+        self.selected_servers_label = ctk.CTkLabel(server_frame, text="", font=ctk.CTkFont(size=11))
+        self.selected_servers_label.grid(row=1, column=0, columnspan=2, sticky='w', padx=10, pady=(0, 5))
         
         # Range selection
         ctk.CTkLabel(self.frame, text="Item ID Range:", 
@@ -115,26 +124,124 @@ class ConfigurationPanel:
 
         return self.frame
     
-    def _toggle_server_mode(self):
-        """Toggle between single server and cross-server analysis mode"""
-        if self.cross_server_var.get():
-            self.server_combo.grid_remove()
-        else:
+    def _show_server_selection(self):
+        """Show server selection dialog"""
+        import tkinter as tk
+        from tkinter import messagebox
+        
+        # Create server selection dialog
+        dialog = tk.Toplevel(self.parent)
+        dialog.title("Select Servers")
+        dialog.geometry("400x500")
+        dialog.resizable(False, False)
+        dialog.transient(self.parent)
+        dialog.grab_set()
+        
+        # Center the dialog
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (400 // 2)
+        y = (dialog.winfo_screenheight() // 2) - (500 // 2)
+        dialog.geometry(f"400x500+{x}+{y}")
+        
+        # Header
+        header_frame = tk.Frame(dialog, bg='#212121')
+        header_frame.pack(fill='x', padx=10, pady=10)
+        
+        tk.Label(header_frame, text="Select Servers for Analysis", 
+                font=('Arial', 14, 'bold'), bg='#212121', fg='white').pack()
+        
+        # Warning label
+        warning_frame = tk.Frame(dialog, bg='#212121')
+        warning_frame.pack(fill='x', padx=10, pady=(0, 10))
+        
+        tk.Label(warning_frame, 
+                text="⚠️ Multiple servers will take significantly longer to process",
+                font=('Arial', 10), bg='#212121', fg='orange').pack()
+        
+        # Server list frame
+        list_frame = tk.Frame(dialog, bg='#212121')
+        list_frame.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        # Scrollable frame for servers
+        canvas = tk.Canvas(list_frame, bg='#2b2b2b')
+        scrollbar = tk.Scrollbar(list_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg='#2b2b2b')
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Server checkboxes
+        server_vars = {}
+        for server in sorted(SERVERS.keys()):
+            var = tk.BooleanVar(value=(server in self.selected_servers))
+            server_vars[server] = var
+            
+            checkbox = tk.Checkbutton(scrollable_frame, text=server, variable=var,
+                                     bg='#2b2b2b', fg='white', selectcolor='#404040',
+                                     font=('Arial', 10))
+            checkbox.pack(anchor='w', padx=10, pady=2)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Buttons
+        button_frame = tk.Frame(dialog, bg='#212121')
+        button_frame.pack(fill='x', padx=10, pady=10)
+        
+        def select_all():
+            for var in server_vars.values():
+                var.set(True)
+        
+        def clear_all():
+            for var in server_vars.values():
+                var.set(False)
+        
+        def apply_selection():
+            selected = [server for server, var in server_vars.items() if var.get()]
+            if not selected:
+                messagebox.showerror("Error", "Please select at least one server.")
+                return
+            
+            self.selected_servers = selected
+            self._update_server_display()
+            dialog.destroy()
+        
+        tk.Button(button_frame, text="Select All", command=select_all,
+                 bg='#404040', fg='white').pack(side='left', padx=5)
+        tk.Button(button_frame, text="Clear All", command=clear_all,
+                 bg='#404040', fg='white').pack(side='left', padx=5)
+        tk.Button(button_frame, text="Cancel", command=dialog.destroy,
+                 bg='#666666', fg='white').pack(side='right', padx=5)
+        tk.Button(button_frame, text="Apply", command=apply_selection,
+                 bg='#1f6aa5', fg='white').pack(side='right', padx=5)
+    
+    def _update_server_display(self):
+        """Update the server display based on selection"""
+        if len(self.selected_servers) == 1:
+            # Single server mode
+            self.server_var.set(self.selected_servers[0])
             self.server_combo.grid()
+            self.selected_servers_label.configure(text="")
+        else:
+            # Multi-server mode
+            self.server_combo.grid_remove()
+            server_text = f"Selected servers: {', '.join(self.selected_servers[:3])}"
+            if len(self.selected_servers) > 3:
+                server_text += f" + {len(self.selected_servers) - 3} more"
+            self.selected_servers_label.configure(text=server_text)
     
     def get_selected_servers(self):
         """Get list of servers for analysis"""
-        if self.cross_server_var.get():
-            return list(SERVERS.keys())  # All servers
-        else:
-            return [self.server_var.get()]  # Single server
+        return self.selected_servers
     
     def get_output_file(self):
-        """Get the appropriate output file based on analysis mode"""
-        if self.cross_server_var.get():
-            return self.cross_server_output_var.get()
-        else:
-            return self.output_file_var.get()
+        """Get the output file"""
+        return self.output_file_var.get()
 
 
 class OptionsPanel:
