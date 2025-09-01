@@ -1,0 +1,7 @@
+itemid,name,price,stock,sold_per_day,category,server
+2,Simple Bed,2000,0,0.05739780360927,Furnishings,Asura
+3,Oak Bed,10000,2,0.078809992464889,Furnishings,Asura
+4,Mahogany Bed,90000,5,2.1216865836721,Furnishings,Asura
+5,Bronze Bed,40000,3,2.7065888522372,Furnishings,Asura
+6,Noble's Bed,455000,11,2.0512577011194,Furnishings,Asura
+8,Royal Bed,40000,4,0.32643638242294,Furnishings,Asura

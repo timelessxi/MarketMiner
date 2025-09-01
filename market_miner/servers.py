@@ -15,21 +15,4 @@ SERVERS = {
     "Siren": 17,
     "Sylph": 8,
     "Valefor": 9,
-    # Inactive servers
-    "Alexander": 10,
-    "Caitsith": 15,
-    "Diabolos": 14,
-    "Fairy": 30,
-    "Garuda": 22,
-    "Gilgamesh": 19,
-    "Hades": 32,
-    "Ifrit": 13,
-    "Kujata": 24,
-    "Midgardsormr": 29,
-    "Pandemonium": 21,
-    "Ramuh": 4,
-    "Remora": 31,
-    "Seraph": 26,
-    "Titan": 3,
-    "Unicorn": 18
 }
