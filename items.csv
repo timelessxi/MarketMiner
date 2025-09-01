@@ -1,7 +1,0 @@
-itemid,name,price,stock,sold_per_day,category,rarity
-4,Mahogany Bed,50000,0,0.26507391604557,Furnishings,Common
-2,Simple Bed,3000,0,0.0059507443664909,Furnishings,Common
-3,Oak Bed,10000,0,0.0079926370051767,Furnishings,Common
-5,Bronze Bed,30000,0,0.22512893321613,Furnishings,Common
-6,Noble's Bed,150000,2,0.24699201461095,Furnishings,Common
-8,Royal Bed,20000,1,0.026378712730543,Furnishings,Common

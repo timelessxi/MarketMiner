@@ -261,7 +261,7 @@ class MarketMinerGUI:
             
             # Prepare CSV fieldnames
             fieldnames = [
-                'itemid', 'name', 'price', 'stock', 'sold_per_day', 'category', 'rarity',
+                'itemid', 'name', 'price', 'stock', 'sold_per_day', 'category', 'server',
             ]
             items_data = []
             
@@ -290,6 +290,9 @@ class MarketMinerGUI:
 
                             # Only include valid, priced items
                             if not (result.get('name') == 'Unknown' or result.get('price', 0) == 0):
+                                # Add server name to result
+                                result = dict(result)
+                                result['server'] = server_name
                                 items_data.append(result)
                                 found_items += 1
                                 # Add to results table
@@ -326,7 +329,23 @@ class MarketMinerGUI:
             # Save results to CSV
             if items_data:
                 try:
-                    with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
+                    # Read existing data if file exists
+                    import os
+                    existing_rows = []
+                    if os.path.exists(output_file):
+                        with open(output_file, 'r', encoding='utf-8', newline='') as csvfile:
+                            reader = csv.DictReader(csvfile)
+                            for row in reader:
+                                existing_rows.append(row)
+
+                    # Build a dict for quick lookup: (itemid, server) -> row
+                    key = lambda row: (str(row.get('itemid', '')), str(row.get('server', '')))
+                    existing_map = {key(row): row for row in existing_rows}
+
+                    # Overwrite or add new rows from items_data
+                    for item in items_data:
+                        k = (str(item.get('itemid', '')), str(item.get('server', server_name)))
+                        # Use clean_keys to ensure all fields present
                         def clean_keys(item):
                             return {
                                 'itemid': item.get('itemid', ''),
@@ -335,14 +354,16 @@ class MarketMinerGUI:
                                 'stock': item.get('stock', ''),
                                 'sold_per_day': item.get('sold_per_day', ''),
                                 'category': item.get('category', ''),
-                                'rarity': item.get('rarity', '')
+                                'server': item.get('server', server_name)
                             }
-                        
-                        cleaned_items_data = [clean_keys(item) for item in items_data]
+                        existing_map[k] = clean_keys(item)
+
+                    # Write all rows back
+                    with open(output_file, 'w', newline='', encoding='utf-8') as csvfile:
                         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                         writer.writeheader()
-                        writer.writerows(cleaned_items_data)
-                    
+                        writer.writerows(existing_map.values())
+
                     self.log(f"Saved {len(items_data)} items to {output_file}", "success")
                 except Exception as e:
                     self.log(f"Error saving CSV: {e}", "error")

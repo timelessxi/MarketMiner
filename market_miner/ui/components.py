@@ -227,22 +227,22 @@ class ResultsTab:
     def create(self, tab_frame):
         """Create the results tab - using tkinter Treeview since CTk doesn't have a table widget"""
         self.frame = tab_frame
-        
+
         # Header
         header = ctk.CTkLabel(self.frame, text="Live Results", 
                              font=ctk.CTkFont(size=18, weight="bold"))
         header.pack(anchor='w', padx=20, pady=(20, 15))
-        
+
         # Table frame
         table_frame = tk.Frame(self.frame, bg='#212121')
         table_frame.pack(fill='both', expand=True, padx=20, pady=(0, 20))
         table_frame.rowconfigure(0, weight=1)
         table_frame.columnconfigure(0, weight=1)
-        
+
         # Treeview for results table
-        cols = ("itemid", "name", "price", "stock", "sold_per_day", "category", "rarity")
+        cols = ("itemid", "name", "price", "stock", "sold_per_day", "category", "server")
         self.results = ttk.Treeview(table_frame, columns=cols, show="headings", height=16)
-        
+
         # Configure style for dark theme
         style = ttk.Style()
         style.theme_use('clam')
@@ -253,29 +253,29 @@ class ResultsTab:
         style.configure("Treeview.Heading",
                        background='#404040',
                        foreground='#dce4ee')
-        
+
         for c, w in (("itemid", 80), ("name", 220), ("price", 90), ("stock", 80), 
-                     ("sold_per_day", 110), ("category", 120), ("rarity", 90)):
+                     ("sold_per_day", 110), ("category", 120), ("server", 120)):
             self.results.heading(c, text=c.title())
             self.results.column(c, width=w, anchor='w', stretch=False, minwidth=w)
-        
+
         # Vertical scrollbar
         v_scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.results.yview)
         self.results.configure(yscrollcommand=v_scrollbar.set)
-        
+
         # Horizontal scrollbar
         h_scrollbar = ttk.Scrollbar(table_frame, orient="horizontal", command=self.results.xview)
         self.results.configure(xscrollcommand=h_scrollbar.set)
-        
+
         # Grid the treeview and scrollbars
         self.results.grid(row=0, column=0, sticky="nsew")
         v_scrollbar.grid(row=0, column=1, sticky="ns")
         h_scrollbar.grid(row=1, column=0, sticky="ew")
-        
+
         # Configure grid weights
         table_frame.rowconfigure(0, weight=1)
         table_frame.columnconfigure(0, weight=1)
-        
+
         return self.frame
     
     def add_row(self, result):
@@ -293,7 +293,7 @@ class ResultsTab:
             format_number(result.get("stock", "")),
             format_number(result.get("sold_per_day", "")),
             result.get("category", "") or "",
-            result.get("rarity", "") or ""
+            result.get("server", "") or ""
         ))
 
 
