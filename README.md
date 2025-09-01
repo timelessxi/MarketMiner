@@ -1,4 +1,4 @@
-# Ï MarketMiner Pro
+# ï¿½ MarketMiner Pro
 
 **Advanced FFXI Auction House Data Mining Tool**
 
@@ -6,34 +6,37 @@ MarketMiner Pro is a sophisticated Python application for scraping and analyzing
 
 ## < Features
 
-### <¯ **Core Functionality**
-- **Multi-server Support** - Scrape data from any FFXI server
+### âš™ï¸ **Core Functionality**
+- **Multi-server Support** - Scrape data from any FFXI server or all servers
+- **Cross-Server Analysis** - Compare prices across all 35 servers automatically
 - **Configurable Range Scanning** - Set custom item ID ranges
 - **Concurrent Processing** - Multi-threaded scraping for maximum speed
 - **Real-time Results** - Live table updates as items are discovered
-- **Advanced Filtering** - Filter by price, rarity, and availability
+- **Stackable Item Support** - Complete stack pricing and sales data
 
-### =Ê **Data Collection**
-- **Auction House Prices** - Current market prices and stock levels
-- **Sales Analytics** - Items sold per day calculations
-- **FFXIclopedia Integration** - Fetch detailed item descriptions and stats
+### ðŸ“Š **Data Collection**
+- **Auction House Prices** - Current market prices for individual items
+- **Stack Pricing** - Bulk pricing data for stackable items (12, 99 stacks)
+- **Sales Analytics** - Sales velocity for both individual and stack purchases
+- **Cross-Server Analysis** - Compare prices across all 35 FFXI servers
 - **Category Classification** - Automatic item categorization
 - **Rarity Detection** - Identify rare, exclusive, and common items
+- **Stack Detection** - Automatically identify stackable items and their stack sizes
 
-### =» **Modern Interface**
+### =ï¿½ **Modern Interface**
 - **CustomTkinter GUI** - Modern, native-looking interface
 - **Dark Theme** - Professional appearance with system integration
 - **Tabbed Interface** - Organized Progress, Results, and Activity Log views
 - **Real-time Progress** - Live statistics and progress tracking
 - **Horizontal Scrolling** - View all data columns in results table
 
-### =È **Output & Analysis**
+### =ï¿½ **Output & Analysis**
 - **CSV Export** - Standard format for data analysis
 - **Comprehensive Data** - Includes prices, descriptions, crafting info
 - **Market Trends** - Sales velocity and stock analysis
 - **Professional Reports** - Clean, organized data output
 
-## =€ Quick Start
+## =ï¿½ Quick Start
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -58,7 +61,7 @@ python main.py
 python -m market_miner
 ```
 
-## =Ë Dependencies
+## =ï¿½ Dependencies
 
 - **customtkinter** - Modern GUI framework
 - **requests** - HTTP client for web scraping
@@ -67,7 +70,7 @@ python -m market_miner
 - **pandas** - Data analysis (optional)
 - **tabulate** - Table formatting
 
-## <® How to Use
+## <ï¿½ How to Use
 
 1. **Launch** the application
 2. **Configure** your scraping parameters:
@@ -101,35 +104,41 @@ Choose from all available FFXI servers including:
 - **Rarity Filters**: Control inclusion of rare and exclusive items
 - **Wiki Integration**: Toggle FFXIclopedia data enrichment
 
-## =Ê Output Format
+## ðŸ“„ **Output Format**
 
 MarketMiner exports data in CSV format with the following columns:
 
+### Single Server Analysis
 - `itemid` - Unique item identifier
 - `name` - Item name
-- `price` - Current auction house price
-- `stock` - Available quantity
-- `sold_per_day` - Sales velocity
-- `category` - Item category
-- `rarity` - Rarity classification
-- `url` - FFXIclopedia URL
-- `wiki_name` - Wiki display name
-- `description` - Item description
-- `stackable` - Stack size information
-- `wiki_category` - Wiki category
-- `resale_price` - NPC resale value
-- `used_in` - Crafting usage
-- `synthesis_recipes` - Recipe information
-- `obtain` - How to obtain the item
+- `price` - Individual item auction house price
+- `stack_price` - Stack price (for stackable items)
+- `sold_per_day` - Individual item sales velocity
+- `stack_sold_per_day` - Stack sales velocity
+- `category` - Item category classification
+- `stackable` - Stack size (12, 99) or "No"
+- `server` - Server name
 
-## ¡ Performance
+### Cross-Server Analysis
+- `itemid` - Unique item identifier
+- `name` - Item name
+- `category` - Item category
+- `lowest_price` - Lowest price across all servers
+- `lowest_server` - Server with lowest price
+- `highest_price` - Highest price across all servers
+- `highest_server` - Server with highest price
+- `average_price` - Average price across servers
+- `price_difference` - Price spread (high - low)
+- `server_count` - Number of servers with data
+
+## ï¿½ Performance
 
 - **Multi-threaded Architecture** - Concurrent processing for speed
 - **Intelligent Rate Limiting** - Respectful to target servers
 - **Memory Efficient** - Optimized for large datasets
 - **Real-time Updates** - Live progress and results display
 
-## =á Ethical Usage
+## =ï¿½ Ethical Usage
 
 MarketMiner is designed for respectful data collection:
 - Built-in rate limiting to avoid server overload
@@ -137,7 +146,7 @@ MarketMiner is designed for respectful data collection:
 - Transparent about scraping activities
 - Respects robots.txt and server policies
 
-## =Ý License
+## =ï¿½ License
 
 This project is for educational and personal use. Please respect FFXIAH.com's terms of service and use responsibly.
 
@@ -145,7 +154,7 @@ This project is for educational and personal use. Please respect FFXIAH.com's te
 
 Contributions welcome! Please read our contributing guidelines and submit pull requests for any improvements.
 
-## =Þ Support
+## =ï¿½ Support
 
 For issues, questions, or feature requests, please open an issue on our GitHub repository.
 

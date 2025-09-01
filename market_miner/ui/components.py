@@ -19,10 +19,16 @@ class ConfigurationPanel:
         
         # Variables
         self.server_var = tk.StringVar(value="Asura")
+        self.cross_server_var = tk.BooleanVar(value=False)
         self.from_var = tk.StringVar(value="1")
         self.to_var = tk.StringVar(value="100")
         self.thread_var = tk.StringVar(value="6")
         self.output_file_var = tk.StringVar(value="items.csv")
+        self.cross_server_output_var = tk.StringVar(value="cross_server_items.csv")
+
+        # UI components that need to be accessed later
+        self.server_combo = None
+        self.cross_server_browse_btn = None
         
     def create(self, row, column, **grid_options):
         """Create the configuration panel using CustomTkinter"""
@@ -36,22 +42,29 @@ class ConfigurationPanel:
         header.grid(row=0, column=0, columnspan=2, sticky='w', padx=20, pady=(20, 10))
         
         # Server selection
-        ctk.CTkLabel(self.frame, text="Server:", 
+        ctk.CTkLabel(self.frame, text="Server Mode:", 
                     font=ctk.CTkFont(size=12)).grid(
             row=1, column=0, sticky='w', padx=(20, 10), pady=(10, 5))
         
-        server_combo = ctk.CTkComboBox(self.frame, variable=self.server_var, 
-                                      values=list(SERVERS.keys()), 
-                                      state="readonly", width=160)
-        server_combo.grid(row=1, column=1, sticky='ew', padx=(0, 20), pady=(10, 5))
+        # Cross-server analysis checkbox
+        cross_server_cb = ctk.CTkCheckBox(self.frame, text="Cross-Server Analysis (All Servers)", 
+                                         variable=self.cross_server_var,
+                                         command=self._toggle_server_mode)
+        cross_server_cb.grid(row=1, column=1, sticky='w', padx=(0, 20), pady=(10, 5))
+        
+        # Single server selection
+        self.server_combo = ctk.CTkComboBox(self.frame, variable=self.server_var, 
+                                           values=list(SERVERS.keys()), 
+                                           state="readonly", width=160)
+        self.server_combo.grid(row=2, column=1, sticky='ew', padx=(0, 20), pady=(5, 5))
         
         # Range selection
         ctk.CTkLabel(self.frame, text="Item ID Range:", 
                     font=ctk.CTkFont(size=12)).grid(
-            row=2, column=0, sticky='w', padx=(20, 10), pady=5)
+            row=3, column=0, sticky='w', padx=(20, 10), pady=5)
         
         range_frame = ctk.CTkFrame(self.frame)
-        range_frame.grid(row=2, column=1, sticky='ew', padx=(0, 20), pady=5)
+        range_frame.grid(row=3, column=1, sticky='ew', padx=(0, 20), pady=5)
         
         from_entry = ctk.CTkEntry(range_frame, textvariable=self.from_var, width=80)
         from_entry.pack(side='left', padx=(10, 5))
@@ -65,18 +78,18 @@ class ConfigurationPanel:
         # Thread count
         ctk.CTkLabel(self.frame, text="Concurrent Threads:", 
                     font=ctk.CTkFont(size=12)).grid(
-            row=3, column=0, sticky='w', padx=(20, 10), pady=5)
+            row=4, column=0, sticky='w', padx=(20, 10), pady=5)
         
         thread_entry = ctk.CTkEntry(self.frame, textvariable=self.thread_var, width=80)
-        thread_entry.grid(row=3, column=1, sticky='w', padx=(0, 20), pady=5)
+        thread_entry.grid(row=4, column=1, sticky='w', padx=(0, 20), pady=5)
         
         # Output file
         ctk.CTkLabel(self.frame, text="Output File:", 
                     font=ctk.CTkFont(size=12)).grid(
-            row=4, column=0, sticky='w', padx=(20, 10), pady=5)
+            row=5, column=0, sticky='w', padx=(20, 10), pady=5)
         
         file_frame = ctk.CTkFrame(self.frame)
-        file_frame.grid(row=4, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
+        file_frame.grid(row=5, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
         file_frame.grid_columnconfigure(0, weight=1)
         
         file_entry = ctk.CTkEntry(file_frame, textvariable=self.output_file_var)
@@ -85,7 +98,43 @@ class ConfigurationPanel:
         self.browse_btn = ctk.CTkButton(file_frame, text="📁 Browse", width=100)
         self.browse_btn.grid(row=0, column=1, padx=(5, 10), pady=10)
         
+        # Output file for cross-server
+        ctk.CTkLabel(self.frame, text="Output File (Cross-Server):",
+                    font=ctk.CTkFont(size=12)).grid(
+            row=6, column=0, sticky='w', padx=(20, 10), pady=5)
+
+        cross_server_file_frame = ctk.CTkFrame(self.frame)
+        cross_server_file_frame.grid(row=6, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
+        cross_server_file_frame.grid_columnconfigure(0, weight=1)
+
+        cross_server_file_entry = ctk.CTkEntry(cross_server_file_frame, textvariable=self.cross_server_output_var)
+        cross_server_file_entry.grid(row=0, column=0, sticky='ew', padx=(10, 5), pady=10)
+
+        self.cross_server_browse_btn = ctk.CTkButton(cross_server_file_frame, text="📁 Browse", width=100)
+        self.cross_server_browse_btn.grid(row=0, column=1, padx=(5, 10), pady=10)
+
         return self.frame
+    
+    def _toggle_server_mode(self):
+        """Toggle between single server and cross-server analysis mode"""
+        if self.cross_server_var.get():
+            self.server_combo.grid_remove()
+        else:
+            self.server_combo.grid()
+    
+    def get_selected_servers(self):
+        """Get list of servers for analysis"""
+        if self.cross_server_var.get():
+            return list(SERVERS.keys())  # All servers
+        else:
+            return [self.server_var.get()]  # Single server
+    
+    def get_output_file(self):
+        """Get the appropriate output file based on analysis mode"""
+        if self.cross_server_var.get():
+            return self.cross_server_output_var.get()
+        else:
+            return self.output_file_var.get()
 
 
 class OptionsPanel:
@@ -240,7 +289,7 @@ class ResultsTab:
         table_frame.columnconfigure(0, weight=1)
 
         # Treeview for results table
-        cols = ("itemid", "name", "price", "stock", "sold_per_day", "category", "server")
+        cols = ("itemid", "name", "price", "stack_price", "sold_per_day", "stack_sold_per_day", "category", "stackable", "server")
         self.results = ttk.Treeview(table_frame, columns=cols, show="headings", height=16)
 
         # Configure style for dark theme
@@ -254,9 +303,9 @@ class ResultsTab:
                        background='#404040',
                        foreground='#dce4ee')
 
-        for c, w in (("itemid", 80), ("name", 220), ("price", 90), ("stock", 80), 
-                     ("sold_per_day", 110), ("category", 120), ("server", 120)):
-            self.results.heading(c, text=c.title())
+        for c, w in (("itemid", 80), ("name", 180), ("price", 90), ("stack_price", 90), 
+                     ("sold_per_day", 100), ("stack_sold_per_day", 110), ("category", 110), ("stackable", 80), ("server", 100)):
+            self.results.heading(c, text=c.replace('_', ' ').title())
             self.results.column(c, width=w, anchor='w', stretch=False, minwidth=w)
 
         # Vertical scrollbar
@@ -286,15 +335,126 @@ class ResultsTab:
             except:
                 return x if x is not None else ""
         
+        # Determine price display based on whether it's a stack price
+        is_stack = result.get('is_stack_price', False)
+        price = result.get('price', 0)
+        
         self.results.insert("", "end", values=(
             result.get("itemid", ""),
             result.get("name", ""),
-            format_number(result.get("price", "")),
-            format_number(result.get("stock", "")),
+            format_number(price) if not is_stack else "",
+            format_number(price) if is_stack else "",
             format_number(result.get("sold_per_day", "")),
+            format_number(result.get("stack_sold_per_day", "")),
             result.get("category", "") or "",
+            result.get("stackable", "No") or "No",
             result.get("server", "") or ""
         ))
+
+
+class CrossServerResultsTab:
+    """Cross-server comparison results tab with arbitrage opportunities"""
+    
+    def __init__(self, parent, theme):
+        self.parent = parent
+        self.theme = theme
+        self.frame = None
+        self.results = None
+        
+    def create(self, tab_frame):
+        """Create the cross-server results tab"""
+        self.frame = tab_frame
+
+        # Header
+        header = ctk.CTkLabel(self.frame, text="Cross-Server Analysis", 
+                             font=ctk.CTkFont(size=18, weight="bold"))
+        header.pack(anchor='w', padx=20, pady=(20, 15))
+
+        # Table frame
+        table_frame = tk.Frame(self.frame, bg='#212121')
+        table_frame.pack(fill='both', expand=True, padx=20, pady=(0, 20))
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
+
+        # Treeview for cross-server results
+        cols = ("itemid", "name", "category", "lowest_price", "lowest_server", 
+               "highest_price", "highest_server", "average_price", "price_difference", "server_count")
+        self.results = ttk.Treeview(table_frame, columns=cols, show="headings", height=16)
+
+        # Configure style for dark theme
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure("Treeview", 
+                       background='#2b2b2b',
+                       foreground='#dce4ee',
+                       fieldbackground='#2b2b2b')
+        style.configure("Treeview.Heading",
+                       background='#404040',
+                       foreground='#dce4ee')
+
+        # Column configurations
+        col_configs = [
+            ("itemid", 80, "Item ID"),
+            ("name", 200, "Item Name"),
+            ("category", 100, "Category"),
+            ("lowest_price", 80, "Low Price"),
+            ("lowest_server", 90, "Low Server"),
+            ("highest_price", 80, "High Price"),
+            ("highest_server", 90, "High Server"),
+            ("average_price", 80, "Avg Price"),
+            ("price_difference", 80, "Difference"),
+            ("server_count", 60, "Servers")
+        ]
+        
+        for col, width, title in col_configs:
+            self.results.heading(col, text=title)
+            self.results.column(col, width=width, anchor='w', stretch=False, minwidth=width)
+
+        # Vertical scrollbar
+        v_scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.results.yview)
+        self.results.configure(yscrollcommand=v_scrollbar.set)
+
+        # Horizontal scrollbar
+        h_scrollbar = ttk.Scrollbar(table_frame, orient="horizontal", command=self.results.xview)
+        self.results.configure(xscrollcommand=h_scrollbar.set)
+
+        # Grid the treeview and scrollbars
+        self.results.grid(row=0, column=0, sticky="nsew")
+        v_scrollbar.grid(row=0, column=1, sticky="ns")
+        h_scrollbar.grid(row=1, column=0, sticky="ew")
+
+        # Configure grid weights
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
+
+        return self.frame
+    
+    def add_comparison_row(self, item_data):
+        """Add a cross-server comparison row"""
+        def format_number(x):
+            try:
+                return f"{int(x):,}"
+            except:
+                return x if x is not None else ""
+        
+        self.results.insert("", "end", values=(
+            item_data.get("itemid", ""),
+            item_data.get("name", ""),
+            item_data.get("category", ""),
+            format_number(item_data.get("lowest_price", "")),
+            item_data.get("lowest_server", ""),
+            format_number(item_data.get("highest_price", "")),
+            item_data.get("highest_server", ""),
+            format_number(item_data.get("average_price", "")),
+            format_number(item_data.get("price_difference", "")),
+            item_data.get("server_count", "")
+        ))
+    
+    def clear_results(self):
+        """Clear all results from the table"""
+        for item in self.results.get_children():
+            self.results.delete(item)
+
 
 
 class LogTab:
