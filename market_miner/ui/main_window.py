@@ -354,8 +354,8 @@ class MarketMinerGUI:
                     with open(skipped_path, "w", encoding="utf-8") as f:
                         json.dump(data, f, ensure_ascii=False,
                                   indent=2, sort_keys=True)
-                except Exception:
-                    pass
+                except Exception as e:
+                    self.log(f"Error saving skip info for item {item_id}: {e}", "error")
 
             selected_servers = self.config_panel.get_selected_servers()
             is_multi = self._is_multi_server()
