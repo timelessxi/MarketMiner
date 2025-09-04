@@ -8,6 +8,7 @@ import csv
 import os
 import threading
 import time
+import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import suppress
 from typing import Dict, List, Optional
@@ -90,7 +91,8 @@ class MarketMinerGUI:
 
         # Right pane (tabs)
         right_panel = ctk.CTkTabview(self.root)
-        right_panel.grid(row=0, column=1, sticky="nsew", padx=(10, 20), pady=20)
+        right_panel.grid(row=0, column=1, sticky="nsew",
+                         padx=(10, 20), pady=20)
         self._setup_tabs(right_panel)
 
         # Status bar
@@ -100,7 +102,8 @@ class MarketMinerGUI:
             font=ctk.CTkFont(size=12),
             anchor="w",
         )
-        self.status.grid(row=1, column=0, columnspan=2, sticky="ew", padx=20, pady=(0, 20))
+        self.status.grid(row=1, column=0, columnspan=2,
+                         sticky="ew", padx=20, pady=(0, 20))
 
     def _setup_left_panel(self, left_panel: ctk.CTkFrame) -> None:
         """Controls: title, start/stop, configuration."""
@@ -146,7 +149,8 @@ class MarketMinerGUI:
         self.config_panel = ConfigurationPanel(left_panel, self.theme)
         self.config_panel.create(1, 0, sticky="ew", padx=20, pady=(0, 15))
         self.config_panel.browse_btn.configure(command=self.browse_output_file)
-        self.config_panel.cross_server_browse_btn.configure(command=self.browse_cross_server_output_file)
+        self.config_panel.cross_server_browse_btn.configure(
+            command=self.browse_cross_server_output_file)
 
         # Spacer + grid weight
         spacer = ctk.CTkFrame(left_panel, height=20)
@@ -167,7 +171,8 @@ class MarketMinerGUI:
 
         # Cross-server
         cross_server_tab = tabview.add("🌐 Cross-Server")
-        self.cross_server_tab = CrossServerResultsTab(cross_server_tab, self.theme)
+        self.cross_server_tab = CrossServerResultsTab(
+            cross_server_tab, self.theme)
         self.cross_server_tab.create(cross_server_tab)
 
         # Logs
@@ -225,7 +230,8 @@ class MarketMinerGUI:
             if os.path.isdir(current_dir):
                 default_dir = current_dir
 
-        folder = filedialog.askdirectory(title="Select Output Folder", initialdir=default_dir)
+        folder = filedialog.askdirectory(
+            title="Select Output Folder", initialdir=default_dir)
         if not folder:
             return
 
@@ -270,10 +276,12 @@ class MarketMinerGUI:
             max_threads = int(self.config_panel.thread_var.get())
 
             if from_id >= to_id:
-                messagebox.showerror("Error", "From ID must be less than To ID")
+                messagebox.showerror(
+                    "Error", "From ID must be less than To ID")
                 return
             if not (1 <= max_threads <= 10):
-                messagebox.showerror("Error", "Thread count must be between 1 and 10")
+                messagebox.showerror(
+                    "Error", "Thread count must be between 1 and 10")
                 return
 
         except ValueError:
@@ -314,6 +322,41 @@ class MarketMinerGUI:
             max_threads = int(self.config_panel.thread_var.get())
             output_file = self.config_panel.get_output_file().strip() or "items.csv"
 
+            # Skipped items file beside items.csv
+            skipped_path = os.path.join(os.path.dirname(
+                output_file) or ".", "skipped_items.json")
+
+            def save_skip(item_id, name, reason):
+                """Append/merge one skipped item into skipped_items.json."""
+                try:
+                    data = {}
+                    if os.path.exists(skipped_path):
+                        with open(skipped_path, "r", encoding="utf-8") as f:
+                            data = json.load(f) or {}
+                    key = str(item_id)
+                    name = name or "Unknown"
+                    entry = data.get(
+                        key, {"itemid": item_id, "name": name, "reason": reason})
+
+                    if entry.get("name", "Unknown") == "Unknown" and name != "Unknown":
+                        entry["name"] = name
+
+                    existing = entry.get("reason", "")
+                    parts = [p.strip() for p in existing.split(
+                        ";") if p.strip()] if existing else []
+                    if reason not in parts:
+                        parts.append(reason)
+                    entry["reason"] = "; ".join(parts)
+
+                    data[key] = entry
+                    os.makedirs(os.path.dirname(skipped_path)
+                                or ".", exist_ok=True)
+                    with open(skipped_path, "w", encoding="utf-8") as f:
+                        json.dump(data, f, ensure_ascii=False,
+                                  indent=2, sort_keys=True)
+                except Exception:
+                    pass
+
             selected_servers = self.config_panel.get_selected_servers()
             is_multi = len(selected_servers) > 1
 
@@ -338,7 +381,8 @@ class MarketMinerGUI:
             # Reset UI progress
             self.progress_tab.progress_bar.set(0)
             if is_multi:
-                self.log(f"Starting multi-server scrape across {len(server_ids)} servers")
+                self.log(
+                    f"Starting multi-server scrape across {len(server_ids)} servers")
                 self.cross_server_tab.clear_results()
             else:
                 one = next(iter(server_ids.keys()))
@@ -351,7 +395,8 @@ class MarketMinerGUI:
             # Data sinks
             items_data: List[dict] = []
             comparison_data: List[dict] = []
-            per_item_bucket = {i: [] for i in range(from_id, to_id + 1)} if is_multi else None
+            per_item_bucket = {i: [] for i in range(
+                from_id, to_id + 1)} if is_multi else None
 
             with ThreadPoolExecutor(max_workers=max_threads) as executor:
                 self.executor = executor
@@ -386,9 +431,11 @@ class MarketMinerGUI:
                             # --- NEW: handle explicit skip payload ---
                             if result.get("skip_reason"):
                                 self.log(
-                                    f"Skipping item {item_id} ({result.get('name','Unknown')}): {result['skip_reason']}",
+                                    f"Skipping item {item_id} ({result.get('name', 'Unknown')}): {result['skip_reason']}",
                                     "warning",
                                 )
+                                save_skip(item_id, result.get(
+                                    "name", "Unknown"), result["skip_reason"])
                                 continue
 
                             row = dict(result)
@@ -396,7 +443,9 @@ class MarketMinerGUI:
 
                             # Skip unknown-name rows for display
                             if row.get("name") == "Unknown":
-                                self.log(f"Filtered: (ID: {item_id}) - No item name found", "warning")
+                                self.log(
+                                    f"Filtered: (ID: {item_id}) - No item name found", "warning")
+                                save_skip(item_id, row.get("name","Unknown"), "excluded by filters")
                                 continue
 
                             # Show per-server result
@@ -415,7 +464,10 @@ class MarketMinerGUI:
                                     "success",
                                 )
                             else:
-                                self.log(f"Filtered: (ID: {item_id}) - excluded by filters", "warning")
+                                self.log(
+                                    f"Filtered: (ID: {item_id}) - excluded by filters", "warning")
+                                save_skip(item_id, result.get(
+                                    "name", "Unknown"), result["skip_reason"])
 
                             # Accumulate for CSV
                             items_data.append(
@@ -436,9 +488,11 @@ class MarketMinerGUI:
                             if is_multi:
                                 per_item_bucket[item_id].append(row)
                                 if len(per_item_bucket[item_id]) == len(server_ids):
-                                    cmp_row = self._compute_comparison(item_id, per_item_bucket[item_id])
+                                    cmp_row = self._compute_comparison(
+                                        item_id, per_item_bucket[item_id])
                                     if cmp_row:
-                                        self.cross_server_tab.add_comparison_row(cmp_row)
+                                        self.cross_server_tab.add_comparison_row(
+                                            cmp_row)
                                         comparison_data.append(cmp_row)
                                         diff = f"{cmp_row['price_difference']:,}"
                                         avg = f"{cmp_row['average_price']:,.0f}"
@@ -449,17 +503,28 @@ class MarketMinerGUI:
                                             f"Avg: {avg} | Diff: {diff} ({cmp_row['server_count']} servers)",
                                             "success",
                                         )
+                        else:
+                            self.log(f"Skipping item {item_id}: excluded or failed to parse", "warning")
+                            save_skip(item_id, "Unknown", "excluded or parse failure")
+
                         # Progress UI
                         elapsed = time.time() - start_ts
-                        rate = (processed_jobs / elapsed) * 60 if elapsed > 0 else 0
-                        self.progress_tab.progress_bar.set(processed_jobs / total_jobs)
-                        self.progress_tab.processed_label.configure(text=f"{processed_jobs}/{total_jobs}")
-                        self.progress_tab.found_label.configure(text=str(found_items))
-                        self.progress_tab.rate_label.configure(text=f"{rate:.1f}/min")
-                        self.progress_tab.progress_var.set(f"Processing item {item_id}...")
+                        rate = (processed_jobs / elapsed) * \
+                            60 if elapsed > 0 else 0
+                        self.progress_tab.progress_bar.set(
+                            processed_jobs / total_jobs)
+                        self.progress_tab.processed_label.configure(
+                            text=f"{processed_jobs}/{total_jobs}")
+                        self.progress_tab.found_label.configure(
+                            text=str(found_items))
+                        self.progress_tab.rate_label.configure(
+                            text=f"{rate:.1f}/min")
+                        self.progress_tab.progress_var.set(
+                            f"Processing item {item_id}...")
 
                     except Exception as e:
-                        self.log(f"Error processing item {item_id} ({sname}): {e}", "error")
+                        self.log(
+                            f"Error processing item {item_id} ({sname}): {e}", "error")
 
             # --- Save CSVs ---
 
@@ -495,11 +560,13 @@ class MarketMinerGUI:
                     w.writeheader()
                     w.writerows(merged.values())
 
-                self.log(f"Saved {len(items_data)} rows to {output_file}", "success")
+                self.log(
+                    f"Saved {len(items_data)} rows to {output_file}", "success")
 
             # 2) Cross-server comparison (only if multi)
             if is_multi and comparison_data:
-                cmp_file = self.config_panel.cross_server_output_var.get().strip() or "cross_server_items.csv"
+                cmp_file = self.config_panel.cross_server_output_var.get(
+                ).strip() or "cross_server_items.csv"
                 cmp_fields = [
                     "itemid",
                     "name",
@@ -520,7 +587,8 @@ class MarketMinerGUI:
                         r = dict(row)
                         r["average_price"] = round(r.get("average_price", 0))
                         w.writerow(r)
-                self.log(f"Saved {len(comparison_data)} price comparisons to {cmp_file}", "success")
+                self.log(
+                    f"Saved {len(comparison_data)} price comparisons to {cmp_file}", "success")
 
             elapsed = time.time() - start_ts
             self.log(f"Scraping completed in {elapsed:.1f} seconds", "success")
