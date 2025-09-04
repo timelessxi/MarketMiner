@@ -9,9 +9,7 @@ class ModernTheme:
     """Modern theme configuration using CustomTkinter"""
     
     def __init__(self):
-        # CustomTkinter color themes
         self.colors = {
-            # Dark theme colors (compatible with CTk)
             'bg': '#212121',
             'card_bg': '#2b2b2b',
             'accent': '#1f538d',
@@ -28,8 +26,7 @@ class ModernTheme:
     
     def apply_theme(self, root=None):
         """Apply the modern CustomTkinter theme"""
-        # Set CustomTkinter appearance mode and color theme
-        ctk.set_appearance_mode("dark")  # "system", "dark", "light"
-        ctk.set_default_color_theme("blue")  # "blue", "green", "dark-blue"
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("blue")
 
-        return None  # No style object needed for CTk
+        return None
