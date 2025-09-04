@@ -358,7 +358,7 @@ class MarketMinerGUI:
                     pass
 
             selected_servers = self.config_panel.get_selected_servers()
-            is_multi = len(selected_servers) > 1
+            is_multi = self._is_multi_server()
 
             # Validate server names -> IDs
             server_ids: Dict[str, int] = {}

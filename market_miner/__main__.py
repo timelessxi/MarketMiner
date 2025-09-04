@@ -4,7 +4,6 @@ Entry point for running MarketMiner as a module
 Usage: python -m market_miner
 """
 
-import tkinter as tk
 from .gui import MarketMinerGUI
 
 

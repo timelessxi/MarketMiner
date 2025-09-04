@@ -240,65 +240,6 @@ class ConfigurationPanel:
         return self.output_file_var.get()
 
 
-class OptionsPanel:
-    """Options panel with filters and advanced settings"""
-    
-    def __init__(self, parent, theme):
-        self.parent = parent
-        self.theme = theme
-        self.frame = None
-        
-        # Variables
-        self.include_no_price_var = tk.BooleanVar(value=True)
-        self.include_rare_var = tk.BooleanVar(value=True)
-        self._advanced_shown = tk.BooleanVar(value=False)
-        
-    def create(self, row, column, **grid_options):
-        """Create the options panel using CustomTkinter"""
-        self.frame = ctk.CTkFrame(self.parent)
-        self.frame.grid(row=row, column=column, **grid_options)
-        
-        # Header
-        header = ctk.CTkLabel(self.frame, text="🔧 Options", 
-                             font=ctk.CTkFont(size=16, weight="bold"))
-        header.grid(row=0, column=0, sticky='w', padx=20, pady=(20, 10))
-        
-        # Basic options
-        include_no_price_cb = ctk.CTkCheckBox(self.frame, text="Include items without prices", 
-                                             variable=self.include_no_price_var)
-        include_no_price_cb.grid(row=1, column=0, sticky='w', padx=20, pady=5)
-        
-        include_rare_cb = ctk.CTkCheckBox(self.frame, text="Include rare/exclusive items", 
-                                         variable=self.include_rare_var)
-        include_rare_cb.grid(row=2, column=0, sticky='w', padx=20, pady=5)
-        
-        # Advanced toggle
-        def toggle_advanced():
-            self._advanced_shown.set(not self._advanced_shown.get())
-            if self._advanced_shown.get():
-                adv_frame.grid()
-                adv_toggle.configure(text="Advanced ▼")
-            else:
-                adv_frame.grid_remove()
-                adv_toggle.configure(text="Advanced ▶")
-        
-        adv_toggle = ctk.CTkButton(self.frame, text="Advanced ▶", 
-                                  command=toggle_advanced, 
-                                  width=120, height=28,
-                                  fg_color="transparent",
-                                  hover_color=("gray70", "gray30"))
-        adv_toggle.grid(row=3, column=0, sticky='w', padx=20, pady=(10, 5))
-        
-        # Advanced frame
-        adv_frame = ctk.CTkFrame(self.frame)
-        adv_frame.grid(row=4, column=0, sticky='ew', padx=20, pady=(5, 20))
-        
-        
-        # Hide advanced by default
-        adv_frame.grid_remove()
-        
-        return self.frame
-
 
 class ProgressTab:
     """Progress tab with status, progress bar, and statistics"""
