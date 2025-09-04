@@ -443,10 +443,10 @@ class MarketMinerGUI:
 
                             # Skip unknown-name rows for display
                             if row.get("name") == "Unknown":
-                                self.log(
-                                    f"Filtered: (ID: {item_id}) - No item name found", "warning")
-                                save_skip(item_id, row.get("name","Unknown"), "excluded by filters")
-                                continue
+                                    self.log(
+                                        f"Filtered: (ID: {item_id}) - No item name found", "warning")
+                                    save_skip(item_id, "Unknown", "no item name")
+                                    continue
 
                             # Show per-server result
                             self.results_tab.add_row(row)
@@ -464,10 +464,9 @@ class MarketMinerGUI:
                                     "success",
                                 )
                             else:
-                                self.log(
-                                    f"Filtered: (ID: {item_id}) - excluded by filters", "warning")
-                                save_skip(item_id, result.get(
-                                    "name", "Unknown"), result["skip_reason"])
+                                    self.log(
+                                        f"Filtered: (ID: {item_id}) - no price found", "warning")
+                                    save_skip(item_id, row.get("name","Unknown"), "no price found")
 
                             # Accumulate for CSV
                             items_data.append(
@@ -504,8 +503,8 @@ class MarketMinerGUI:
                                             "success",
                                         )
                         else:
-                            self.log(f"Skipping item {item_id}: excluded or failed to parse", "warning")
-                            save_skip(item_id, "Unknown", "excluded or parse failure")
+                            self.log(f"Skipping item {item_id}: failed to fetch or parse", "warning")
+                            save_skip(item_id, "Unknown", "failed to fetch or parse")
 
                         # Progress UI
                         elapsed = time.time() - start_ts
@@ -592,6 +591,7 @@ class MarketMinerGUI:
 
             elapsed = time.time() - start_ts
             self.log(f"Scraping completed in {elapsed:.1f} seconds", "success")
+            self.progress_tab.progress_bar.set(1.0)
             self.progress_tab.progress_var.set("Completed! 🎉")
 
         except Exception as e:
