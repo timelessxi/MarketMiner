@@ -22,9 +22,7 @@ class ConfigurationPanel:
         self.selected_servers = ["Asura"]  # List of selected servers
         self.from_var = tk.StringVar(value="1")
         self.to_var = tk.StringVar(value="100")
-        self.thread_var = tk.StringVar(value="6")
-        self.output_file_var = tk.StringVar(value="output/items.csv")
-        self.cross_server_output_var = tk.StringVar(value="output/cross_server_items.csv")
+        self.thread_var = tk.StringVar(value="3")
 
         # UI components that need to be accessed later
         self.server_combo = None
@@ -89,34 +87,43 @@ class ConfigurationPanel:
                     font=ctk.CTkFont(size=12)).grid(
             row=4, column=0, sticky='w', padx=(20, 10), pady=5)
         
-        thread_entry = ctk.CTkEntry(self.frame, textvariable=self.thread_var, width=80)
-        thread_entry.grid(row=4, column=1, sticky='w', padx=(0, 20), pady=5)
+        thread_frame = ctk.CTkFrame(self.frame)
+        thread_frame.grid(row=4, column=1, sticky='w', padx=(0, 20), pady=5)
+        
+        thread_entry = ctk.CTkEntry(thread_frame, textvariable=self.thread_var, width=60)
+        thread_entry.pack(side='left', padx=(10, 5))
+        
+        thread_hint = ctk.CTkLabel(thread_frame, text="(recommended: 3-4)", 
+                                  font=ctk.CTkFont(size=10), 
+                                  text_color=("gray50", "gray60"))
+        thread_hint.pack(side='left', padx=(5, 10))
         
 
-        # Output folder selection (for both CSVs)
-        ctk.CTkLabel(self.frame, text="Output Folder:",
+        # Output information (no selection needed)
+        ctk.CTkLabel(self.frame, text="Output Files:",
                     font=ctk.CTkFont(size=12)).grid(
             row=5, column=0, sticky='w', padx=(20, 10), pady=5)
 
-        folder_frame = ctk.CTkFrame(self.frame)
-        folder_frame.grid(row=5, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
-        folder_frame.grid_columnconfigure(0, weight=1)
+        output_frame = ctk.CTkFrame(self.frame)
+        output_frame.grid(row=5, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
 
-        # Show the folder path (not the file)
-        import os
-        def folder_from_path(path):
-            if not path:
-                return "output"
-            return os.path.dirname(path) if os.path.dirname(path) else path
-        self.output_folder_var = tk.StringVar(value=folder_from_path(self.output_file_var.get()))
-        folder_entry = ctk.CTkEntry(folder_frame, textvariable=self.output_folder_var, state="readonly")
-        folder_entry.grid(row=0, column=0, sticky='ew', padx=(10, 5), pady=10)
+        # Show where files will be saved
+        location_label = ctk.CTkLabel(output_frame, 
+                                     text="📁 Files will be saved to: output/",
+                                     font=ctk.CTkFont(size=11))
+        location_label.grid(row=0, column=0, sticky='w', padx=10, pady=(10, 5))
 
-        self.browse_btn = ctk.CTkButton(folder_frame, text="📁 Browse", width=100)
-        self.browse_btn.grid(row=0, column=1, padx=(5, 10), pady=10)
+        # List the files that will be created
+        files_label = ctk.CTkLabel(output_frame, 
+                                  text="• items.csv (per-server results)\n• cross_server_items.csv (price comparisons)\n• skipped_items.json (excluded items)",
+                                  font=ctk.CTkFont(size=10), 
+                                  text_color=("gray50", "gray60"),
+                                  justify="left")
+        files_label.grid(row=1, column=0, sticky='w', padx=10, pady=(0, 10))
 
-        # Hide cross-server output file UI (now handled by folder)
-        self.cross_server_browse_btn = self.browse_btn
+        # Keep these for compatibility but they won't be used for browsing
+        self.browse_btn = None
+        self.cross_server_browse_btn = None
 
         return self.frame
     
@@ -236,8 +243,8 @@ class ConfigurationPanel:
         return self.selected_servers
     
     def get_output_file(self):
-        """Get the output file"""
-        return self.output_file_var.get()
+        """Get the output file - always in output folder"""
+        return "output/items.csv"
 
 
 
@@ -379,15 +386,15 @@ class ResultsTab:
             except:
                 return x if x is not None else ""
         
-        # Determine price display based on whether it's a stack price
-        is_stack = result.get('is_stack_price', False)
+        # Show both individual and stack prices when available
         price = result.get('price', 0)
+        stack_price = result.get('stack_price', 0)
         
         self.results.insert("", "end", values=(
             result.get("itemid", ""),
             result.get("name", ""),
-            format_number(price) if not is_stack else "",
-            format_number(price) if is_stack else "",
+            format_number(price) if price > 0 else "",
+            format_number(stack_price) if stack_price > 0 else "",
             format_number(result.get("sold_per_day", "")),
             format_number(result.get("stack_sold_per_day", "")),
             result.get("category", "") or "",

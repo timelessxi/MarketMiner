@@ -88,15 +88,6 @@ class MarketMinerScraper:
             if "temporary" in stats_text:
                 rarity_flags.append("Temporary")
 
-            # Skip non-sellable/non-tradeable items early
-            if any(flag in rarity_flags for flag in ("Exclusive", "No Auction", "No Sale")):
-                return {
-                    "itemid": item_id,
-                    "name": item_data.get("name", "Unknown"),
-                    "rarity": ", ".join(rarity_flags) if rarity_flags else "Common",
-                    "skip_reason": "non-sellable/non-tradeable",
-                }
-
             item_data["rarity"] = ", ".join(rarity_flags) if rarity_flags else "Common"
 
             # ---------- Stack info (if there is a separate stack view) ----------
