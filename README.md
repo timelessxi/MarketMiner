@@ -41,7 +41,7 @@ Results save automatically with timestamps so you can compare different runs.
 Files created:
 - `items_YYYYMMDD_HHMMSS.csv` - Your results
 - `cross_server_items_YYYYMMDD_HHMMSS.csv` - Price comparisons (if using multiple servers)
-- `skipped_items.json` - Items that can't be sold (builds up over time)
+- `skipped_items.json` - Items that can't be sold (already pre-populated)
 
 ## Notes
 
