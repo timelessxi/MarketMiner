@@ -1,163 +1,119 @@
-# � MarketMiner Pro
+# MarketMiner Pro
 
-**Advanced FFXI Auction House Data Mining Tool**
+A Python tool for scraping FFXI auction house data from FFXIAH.com. Built this to help with market analysis and price tracking across servers.
 
-MarketMiner Pro is a sophisticated Python application for scraping and analyzing item data from FFXIAH.com auction house. Built with a modern CustomTkinter interface, it provides comprehensive market analysis capabilities for Final Fantasy XI players and traders.
+## What it does
 
-## < Features
+- Scrapes item data from FFXIAH auction house pages
+- Works with single servers or all servers at once  
+- Shows real-time results as it finds items
+- Exports everything to CSV for spreadsheet analysis
+- Has a decent GUI built with CustomTkinter
 
-### ⚙️ **Core Functionality**
-- **Multi-server Support** - Scrape data from any FFXI server or all servers
-- **Cross-Server Analysis** - Compare prices across all 35 servers automatically
-- **Configurable Range Scanning** - Set custom item ID ranges
-- **Concurrent Processing** - Multi-threaded scraping for maximum speed
-- **Real-time Results** - Live table updates as items are discovered
-- **Stackable Item Support** - Complete stack pricing and sales data
+## Features
 
-### 📊 **Data Collection**
-- **Auction House Prices** - Current market prices for individual items
-- **Stack Pricing** - Bulk pricing data for stackable items (12, 99 stacks)
-- **Sales Analytics** - Sales velocity for both individual and stack purchases
-- **Cross-Server Analysis** - Compare prices across all 35 FFXI servers
-- **Category Classification** - Automatic item categorization
-- **Rarity Detection** - Identify rare, exclusive, and common items
-- **Stack Detection** - Automatically identify stackable items and their stack sizes
+**Data Collection:**
+- Individual item prices and sales data
+- Stack prices for stackable items (12s, 99s)
+- Cross-server price comparisons 
+- Item categories
+- Sales velocity tracking
 
-### =� **Modern Interface**
-- **CustomTkinter GUI** - Modern, native-looking interface
-- **Dark Theme** - Professional appearance with system integration
-- **Tabbed Interface** - Organized Progress, Results, and Activity Log views
-- **Real-time Progress** - Live statistics and progress tracking
-- **Horizontal Scrolling** - View all data columns in results table
+**Interface:**
+- Dark theme GUI that doesn't hurt your eyes
+- Real-time progress tracking
+- Live results table that updates as it scrapes
+- Tabbed interface for progress/results/logs
 
-### =� **Output & Analysis**
-- **CSV Export** - Standard format for data analysis
-- **Comprehensive Data** - Includes prices, descriptions, crafting info
-- **Market Trends** - Sales velocity and stock analysis
-- **Professional Reports** - Clean, organized data output
+**Performance:**
+- Multi-threaded scraping (configurable 1-20 threads)
+- Built-in rate limiting so we don't hammer their servers
+- Handles errors and retries automatically
 
-## =� Quick Start
+## Installation
 
-### Prerequisites
-- Python 3.8 or higher
-- Internet connection for data scraping
+You'll need Python 3.8 or newer.
 
-### Installation
 ```bash
-# Clone the repository
-git clone [repository-url]
+git clone https://github.com/your-username/MarketMiner.git
 cd MarketMiner
+
+# Set up virtual environment (recommended)
+python -m venv venv
+
+# Windows:
+venv\Scripts\activate
+# Mac/Linux:
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-### Usage
-```bash
-# Run the GUI application
-python main.py
+## Usage
 
-# Or run as a module
-python -m market_miner
+Just run it:
+```bash
+python main.py
 ```
 
-## =� Dependencies
+The GUI is pretty straightforward:
+1. Pick your server (or "All Servers" for cross-server analysis)
+2. Set the item ID range you want to scan
+3. Adjust thread count if needed (5-10 works well)
+4. Hit start and watch it go
 
-- **customtkinter** - Modern GUI framework
-- **requests** - HTTP client for web scraping
-- **beautifulsoup4** - HTML parsing
-- **lxml** - XML/HTML parser
-- **pandas** - Data analysis (optional)
-- **tabulate** - Table formatting
+Results get saved to a CSV file automatically.
 
-## <� How to Use
+## Output
 
-1. **Launch** the application
-2. **Configure** your scraping parameters:
-   - Select target server
-   - Set item ID range
-   - Adjust thread count
-   - Choose output file location
-3. **Set Options**:
-   - Include/exclude items without prices
-   - Include/exclude rare items
-   - Enable FFXIclopedia data fetching
-4. **Start Scraping** and monitor progress
-5. **View Results** in the live results table
-6. **Export Data** automatically to CSV
+**Single server mode** gives you:
+- Item ID, name, individual price, stack price
+- Sales per day for both individual and stacks  
+- Item category and stackability info
+- Server name
 
-## =' Configuration Options
+**Cross-server mode** shows:
+- Lowest/highest prices across all servers
+- Which servers have the best/worst prices
+- Average prices and price differences
+- How many servers actually have data
 
-### Server Selection
-Choose from all available FFXI servers including:
-- Asura, Bahamut, Bismarck, Carbuncle, Cerberus
-- Fenrir, Lakshmi, Leviathan, Odin, Phoenix
-- Quetzalcoatl, Ragnarok, Shiva, Siren, Valefor
+## Configuration
 
-### Performance Settings
-- **Concurrent Threads**: 1-20 threads for optimal performance
-- **Rate Limiting**: Built-in delays for respectful scraping
-- **Error Handling**: Automatic retry and error recovery
+**Servers:** All the usual suspects - Asura, Bahamut, Carbuncle, etc. Full list of 35+ servers supported (includes inactive servers with old data).
 
-### Data Filtering
-- **Price Filters**: Include/exclude items without market prices
-- **Rarity Filters**: Control inclusion of rare and exclusive items
-- **Wiki Integration**: Toggle FFXIclopedia data enrichment
+**Performance:** Start with 3-5 threads. More isn't always better and might get you rate limited.
 
-## 📄 **Output Format**
+## Dependencies
 
-MarketMiner exports data in CSV format with the following columns:
+The usual suspects:
+- `requests` for web scraping
+- `beautifulsoup4` for parsing HTML
+- `customtkinter` for the GUI
+- `pandas` for data handling
+- A few others (see requirements.txt)
 
-### Single Server Analysis
-- `itemid` - Unique item identifier
-- `name` - Item name
-- `price` - Individual item auction house price
-- `stack_price` - Stack price (for stackable items)
-- `sold_per_day` - Individual item sales velocity
-- `stack_sold_per_day` - Stack sales velocity
-- `category` - Item category classification
-- `stackable` - Stack size (12, 99) or "No"
-- `server` - Server name
+## Fair Warning
 
-### Cross-Server Analysis
-- `itemid` - Unique item identifier
-- `name` - Item name
-- `category` - Item category
-- `lowest_price` - Lowest price across all servers
-- `lowest_server` - Server with lowest price
-- `highest_price` - Highest price across all servers
-- `highest_server` - Server with highest price
-- `average_price` - Average price across servers
-- `price_difference` - Price spread (high - low)
-- `server_count` - Number of servers with data
+This scrapes data from FFXIAH.com, so:
+- Don't go crazy with the thread count
+- Built-in rate limiting should keep you safe
+- Use it responsibly 
+- Respect their servers and ToS
 
-## � Performance
+## Contributing
 
-- **Multi-threaded Architecture** - Concurrent processing for speed
-- **Intelligent Rate Limiting** - Respectful to target servers
-- **Memory Efficient** - Optimized for large datasets
-- **Real-time Updates** - Live progress and results display
+Found a bug? Want to add a feature? PRs welcome. Just try to keep the code readable.
 
-## =� Ethical Usage
+## Issues
 
-MarketMiner is designed for respectful data collection:
-- Built-in rate limiting to avoid server overload
-- Reasonable default thread counts
-- Transparent about scraping activities
-- Respects robots.txt and server policies
-
-## =� License
-
-This project is for educational and personal use. Please respect FFXIAH.com's terms of service and use responsibly.
-
-## > Contributing
-
-Contributions welcome! Please read our contributing guidelines and submit pull requests for any improvements.
-
-## =� Support
-
-For issues, questions, or feature requests, please open an issue on our GitHub repository.
+If something breaks, open an issue on GitHub with:
+- What you were doing
+- What went wrong  
+- Your Python version
+- Any error messages
 
 ---
 
-**MarketMiner Pro v2.0** - *Professional FFXI Market Analysis Tool*
+Built for the FFXI community. Happy trading!
