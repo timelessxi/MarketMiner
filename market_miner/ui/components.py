@@ -100,9 +100,9 @@ class ConfigurationPanel:
         
 
         # Output information (no selection needed)
-        ctk.CTkLabel(self.frame, text="Output Files:",
-                    font=ctk.CTkFont(size=12)).grid(
-            row=5, column=0, sticky='w', padx=(20, 10), pady=5)
+        # ctk.CTkLabel(self.frame, text="Output Files:",
+        #             font=ctk.CTkFont(size=12)).grid(
+        #     row=5, column=0, sticky='w', padx=(20, 10), pady=5)
 
         output_frame = ctk.CTkFrame(self.frame)
         output_frame.grid(row=5, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
@@ -112,14 +112,6 @@ class ConfigurationPanel:
                                      text="📁 Files will be saved to: output/",
                                      font=ctk.CTkFont(size=11))
         location_label.grid(row=0, column=0, sticky='w', padx=10, pady=(10, 5))
-
-        # List the files that will be created
-        files_label = ctk.CTkLabel(output_frame, 
-                                  text="• items_YYYYMMDD_HHMMSS.csv (per-server results)\n• cross_server_items_YYYYMMDD_HHMMSS.csv (price comparisons)\n• skipped_items.json (excluded items - cumulative)",
-                                  font=ctk.CTkFont(size=10), 
-                                  text_color=("gray50", "gray60"),
-                                  justify="left")
-        files_label.grid(row=1, column=0, sticky='w', padx=10, pady=(0, 10))
 
         # Keep these for compatibility but they won't be used for browsing
         self.browse_btn = None
@@ -270,19 +262,10 @@ class ProgressTab:
         """Create the progress tab using CustomTkinter"""
         self.frame = tab_frame
         
-        # Status header
-        status_header = ctk.CTkLabel(self.frame, text="Status", 
-                                    font=ctk.CTkFont(size=18, weight="bold"))
-        status_header.pack(anchor='w', padx=20, pady=(20, 10))
-        
-        # Status label
-        status_label = ctk.CTkLabel(self.frame, textvariable=self.progress_var,
-                                   font=ctk.CTkFont(size=12))
-        status_label.pack(anchor='w', padx=20, pady=(0, 15))
         
         # ETA display
         eta_frame = ctk.CTkFrame(self.frame, fg_color="transparent")
-        eta_frame.pack(fill='x', padx=20, pady=(0, 10))
+        eta_frame.pack(fill='x', padx=20, pady=(20, 10))
         
         ctk.CTkLabel(eta_frame, text="Estimated Time Remaining:",
                     font=ctk.CTkFont(size=12)).pack(side='left')

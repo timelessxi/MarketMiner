@@ -23,7 +23,6 @@ from .components import (
     ProgressTab,
     ResultsTab,
     CrossServerResultsTab,
-    LogTab,
 )
 from ..scraper import MarketMinerScraper
 from ..servers import SERVERS
@@ -56,7 +55,6 @@ class MarketMinerGUI:
         self.progress_tab: Optional[ProgressTab] = None
         self.results_tab: Optional[ResultsTab] = None
         self.cross_server_tab: Optional[CrossServerResultsTab] = None
-        self.log_tab: Optional[LogTab] = None
         self.start_btn: Optional[ctk.CTkButton] = None
         self.stop_btn: Optional[ctk.CTkButton] = None
         self.status: Optional[ctk.CTkLabel] = None
@@ -169,10 +167,6 @@ class MarketMinerGUI:
             cross_server_tab, self.theme)
         self.cross_server_tab.create(cross_server_tab)
 
-        # Logs
-        log_tab = tabview.add("📝 Activity Log")
-        self.log_tab = LogTab(log_tab, self.theme)
-        self.log_tab.create(log_tab)
 
         tabview.set("📊 Progress")
 
@@ -248,17 +242,9 @@ class MarketMinerGUI:
 
 
     def log(self, message: str, level: str = "info") -> None:
-        """Log message to UI."""
-        self.log_tab.log(message, level)
-
-        emoji = (
-            "🟢" if level == "success" else
-            "🔴" if level == "error" else
-            "🟡" if level == "warning" else
-            "🔵"
-        )
-        self.status.configure(text=f"{emoji} {message}")
-        self.root.update_idletasks()
+        """Log message (simplified - no UI logging)."""
+        # Could add console logging here if needed
+        pass
 
     # -----------------------------
     # Organized logging methods
