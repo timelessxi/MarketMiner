@@ -385,10 +385,20 @@ class MarketMinerGUI:
             max_threads = int(self.config_panel.thread_var.get())
             output_file = self.config_panel.get_output_file().strip() or "items.csv"
 
-            # Skipped items file with same timestamp as output files
-            base_name = os.path.basename(output_file).replace("items_", "").replace(".csv", "")
+            # Skipped items file - single file for all runs
             skipped_path = os.path.join(os.path.dirname(
-                output_file) or ".", f"skipped_items_{base_name}.json")
+                output_file) or ".", "skipped_items.json")
+
+            # Load existing skipped items to avoid re-checking them
+            known_skipped = {}
+            if os.path.exists(skipped_path):
+                try:
+                    with open(skipped_path, "r", encoding="utf-8") as f:
+                        known_skipped = json.load(f) or {}
+                    self.log(f"📋 Loaded {len(known_skipped)} previously skipped items")
+                except Exception as e:
+                    self.log(f"⚠️ Could not load skipped items: {e}", "warning")
+                    known_skipped = {}
 
             def save_skip(item_id, name, reason):
                 """Append/merge one skipped item into skipped_items.json."""
@@ -459,16 +469,128 @@ class MarketMinerGUI:
 
                 # Submit tasks
                 if is_multi:
-                    fut_to_key = {
-                        executor.submit(self.scraper.get_item_data, item_id, sid): (item_id, sname)
-                        for item_id in range(from_id, to_id + 1)
-                        for sname, sid in server_ids.items()
+                    # For multi-server: validate each item ID exists first, then query all servers
+                    validated_items = set()
+                    validation_server = next(iter(server_ids.items()))  # Pick first server for validation
+                    val_sname, val_sid = validation_server
+                    
+                    # Phase 1: Filter out known skipped items, then validate remaining
+                    items_to_check = []
+                    for item_id in range(from_id, to_id + 1):
+                        if str(item_id) in known_skipped:
+                            # Already know this item should be skipped
+                            skip_info = known_skipped[str(item_id)]
+                            self._log_item_skipped(item_id, skip_info.get("name", "Unknown"), f"previously skipped: {skip_info.get('reason', 'unknown')}")
+                            processed_jobs += 1
+                        else:
+                            items_to_check.append(item_id)
+                    
+                    self.log(f"⏭️ Auto-skipped {len(range(from_id, to_id + 1)) - len(items_to_check)} previously known items")
+                    
+                    validation_futures = {
+                        executor.submit(self.scraper.get_item_data, item_id, val_sid): item_id
+                        for item_id in items_to_check
                     }
+                    
+                    for val_fut in as_completed(validation_futures):
+                        if not self.is_running:
+                            break
+                        
+                        item_id = validation_futures[val_fut]
+                        processed_jobs += 1
+                        try:
+                            result = val_fut.result()
+                            if result and result.get("name") != "Unknown":
+                                # Check if item is sellable - if not, skip all servers
+                                rarity = result.get("rarity", "")
+                                if any(flag in rarity for flag in ["Exclusive", "No Auction", "No Sale"]):
+                                    # Item exists but not sellable - skip all servers
+                                    self._log_item_skipped(item_id, result.get("name", "Unknown"), "non-sellable/non-tradeable")
+                                    save_skip(item_id, result.get("name", "Unknown"), "non-sellable/non-tradeable")
+                                    continue
+                                
+                                validated_items.add(item_id)
+                                # Process the validation server result immediately
+                                row = dict(result)
+                                row["server"] = val_sname
+                                if row.get("price", 0) > 0:
+                                    found_items += 1
+                                    self._log_item_found(item_id, row)
+                                    self.results_tab.add_row(row)
+                                    items_data.append({
+                                        "itemid": row.get("itemid", ""),
+                                        "name": row.get("name", ""),
+                                        "price": row.get("price", 0),
+                                        "stack_price": row.get("stack_price", 0),
+                                        "sold_per_day": row.get("sold_per_day", 0),
+                                        "stack_sold_per_day": row.get("stack_sold_per_day", 0),
+                                        "category": row.get("category", ""),
+                                        "stackable": row.get("stackable", "No"),
+                                        "server": val_sname
+                                    })
+                                    per_item_bucket[item_id].append(row)
+                                else:
+                                    rarity = row.get("rarity", "")
+                                    if any(flag in rarity for flag in ["Exclusive", "No Auction", "No Sale"]):
+                                        skip_reason = "non-sellable/non-tradeable"
+                                    else:
+                                        skip_reason = "no price found"
+                                    self._log_item_skipped(item_id, row.get("name", "Unknown"), skip_reason)
+                                    save_skip(item_id, row.get("name", "Unknown"), skip_reason)
+                            else:
+                                # Invalid item ID - skip entirely
+                                self._log_item_skipped(item_id, "Unknown", "item does not exist")
+                                save_skip(item_id, "Unknown", "item does not exist")
+                        except Exception as e:
+                            self._log_item_skipped(item_id, "Unknown", f"validation error: {e}")
+                            save_skip(item_id, "Unknown", f"validation error: {e}")
+                        
+                        # Update progress during validation
+                        time.sleep(0.05)
+                        current_total = total_items + len(validated_items) * (len(server_ids) - 1)
+                        progress = processed_jobs / max(current_total, processed_jobs)
+                        
+                        # Update progress components individually
+                        self.progress_tab.progress_bar.set(progress)
+                        self.progress_tab.processed_label.configure(text=f"{processed_jobs}/{current_total}")
+                        self.progress_tab.found_label.configure(text=str(found_items))
+                        
+                        elapsed = time.time() - start_ts
+                        rate = (processed_jobs / elapsed * 60) if elapsed > 0 else 0
+                        self.progress_tab.rate_label.configure(text=f"{rate:.1f}/min")
+                    
+                    # Phase 2: Query remaining servers for validated items only
+                    remaining_servers = [(sname, sid) for sname, sid in server_ids.items() if sname != val_sname]
+                    if validated_items and remaining_servers:
+                        fut_to_key = {
+                            executor.submit(self.scraper.get_item_data, item_id, sid): (item_id, sname)
+                            for item_id in validated_items
+                            for sname, sid in remaining_servers
+                        }
+                    else:
+                        fut_to_key = {}  # No additional queries needed
+                    
+                    # Update total jobs count: validation phase + remaining servers for validated items  
+                    total_jobs = total_items + len(validated_items) * (len(server_ids) - 1)
                 else:
+                    # Single server mode - also skip known items
                     sname, sid = next(iter(server_ids.items()))
+                    
+                    items_to_check = []
+                    for item_id in range(from_id, to_id + 1):
+                        if str(item_id) in known_skipped:
+                            skip_info = known_skipped[str(item_id)]
+                            self._log_item_skipped(item_id, skip_info.get("name", "Unknown"), f"previously skipped: {skip_info.get('reason', 'unknown')}")
+                            processed_jobs += 1
+                        else:
+                            items_to_check.append(item_id)
+                    
+                    if items_to_check != list(range(from_id, to_id + 1)):
+                        self.log(f"⏭️ Auto-skipped {len(range(from_id, to_id + 1)) - len(items_to_check)} previously known items")
+                    
                     fut_to_key = {
                         executor.submit(self.scraper.get_item_data, item_id, sid): (item_id, sname)
-                        for item_id in range(from_id, to_id + 1)
+                        for item_id in items_to_check
                     }
 
                 for fut in as_completed(fut_to_key):
