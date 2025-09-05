@@ -1,139 +1,59 @@
 # MarketMiner Pro
 
-A Python tool for scraping FFXI auction house data from FFXIAH.com. Built this to help with market analysis and price tracking across servers.
+Scrapes FFXI auction house data from FFXIAH.com for market analysis and price tracking.
 
 ## What it does
 
-- Scrapes item data from FFXIAH auction house pages
-- Works with single servers or all servers at once  
-- Shows real-time results as it finds items
-- Exports everything to timestamped CSV files
-- Has a clean GUI built with CustomTkinter
-
-## Key Features
-
-**Smart Performance:**
-- Multi-threaded scraping (configurable 1-20 threads)
-- Intelligent item validation - skips non-existent items quickly
-- Remembers previously skipped items to avoid re-checking
-- Built-in rate limiting to respect servers
-
-**Data Collection:**
-- Individual item prices and sales data
-- Stack prices for stackable items (12s, 99s)
-- Cross-server price comparisons 
-- Item categories and sales velocity
-
-**Modern Interface:**
-- Dark theme GUI with real-time progress tracking
-- Estimated time remaining display
-- Live results table that updates as it scrapes
-- Clean tabbed interface: Progress, Results, Cross-Server
+- Scrapes item prices from FFXIAH auction house
+- Works with single servers or all active servers
+- Real-time progress with time estimates
+- Exports to timestamped CSV files
+- Clean dark theme interface
 
 ## Installation
 
-You'll need Python 3.8 or newer.
+Need Python 3.8+:
 
 ```bash
-git clone https://github.com/your-username/MarketMiner.git
+git clone https://github.com/timelessxi/MarketMiner.git
 cd MarketMiner
-
-# Set up virtual environment (recommended)
 python -m venv venv
-
-# Windows:
 venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-```
-
-## Usage
-
-Just run it:
-```bash
 python main.py
 ```
 
-The GUI is straightforward:
-1. Pick your server (or "All Servers" for cross-server analysis)
-2. Set the item ID range you want to scan
-3. Adjust thread count if needed (3-5 recommended)
-4. Hit start and watch the progress
+Or download the executable from [Releases](https://github.com/timelessxi/MarketMiner/releases).
 
-Results get saved automatically with timestamps.
+## Usage
 
-## Output Files
+1. Pick your server
+2. Set item ID range to scan
+3. Hit start and wait
 
-Each run creates unique timestamped files:
-- `items_20250105_143052.csv` - Per-server results
-- `cross_server_items_20250105_143052.csv` - Price comparisons (multi-server only)  
-- `skipped_items.json` - Cumulative log of excluded items
+Results save automatically with timestamps so you can compare different runs.
 
-**Single server results include:**
-- Item ID, name, individual/stack prices
-- Sales per day for both individual and stacks  
-- Item category and stackability info
+## Output
 
-**Cross-server analysis shows:**
-- Lowest/highest prices across all servers
-- Which servers have the best/worst prices
-- Average prices and price differences
-- Server coverage statistics
+**Single server**: Item prices, sales data, categories per server
+**Cross-server**: Price comparisons across all servers showing best deals
 
-## Performance & Optimization
+Files created:
+- `items_YYYYMMDD_HHMMSS.csv` - Your results
+- `cross_server_items_YYYYMMDD_HHMMSS.csv` - Price comparisons (if using multiple servers)
+- `skipped_items.json` - Items that can't be sold (builds up over time)
 
-**Smart Skipping:**
-- Validates items on one server before checking all servers
-- Remembers non-sellable items from previous runs
-- Automatically skips known bad items for faster subsequent runs
+## Notes
 
-**Recommended Settings:**
-- **Threads**: 3-5 (more isn't always better)
-- **Servers**: Single server for focused analysis, multi-server for price comparison
-- **Ranges**: Start small (1-1000) to get familiar
+- Uses 3-5 threads by default (don't go crazy)
+- Remembers bad items from previous runs to speed things up
+- Cross-server scans take longer but show price differences
+- Data comes from FFXIAH.com - use responsibly
 
-**Server Notes:**
-- Includes all 35+ FFXI servers (including inactive ones with old data)
-- Cross-server scans take significantly longer
-- Inactive servers may have stale data
+## License
 
-## Dependencies
-
-- `requests` - Web scraping
-- `beautifulsoup4` - HTML parsing  
-- `customtkinter` - Modern GUI
-- `pandas` - Data handling
-- `lxml` - Fast parsing
-- `tabulate` - Table formatting
-
-## Fair Warning
-
-This scrapes data from FFXIAH.com, so:
-- Don't go crazy with the thread count
-- Built-in rate limiting keeps you safe
-- Use it responsibly and respect their servers
-- Follow FFXIAH.com's terms of service
-
-## Contributing
-
-Found a bug? Want to add a feature? PRs welcome. Just keep the code readable.
-
-## Troubleshooting
-
-If something breaks, check:
-- Your internet connection
-- Python version (3.8+ required)
-- Virtual environment is activated
-- All dependencies installed correctly
-
-For bugs, open a GitHub issue with:
-- What you were doing
-- Error messages
-- Your setup info
+MIT License - see LICENSE file
 
 ---
 
-**MarketMiner Pro** - Built for the FFXI community. Happy trading!
+Built for the FFXI community
