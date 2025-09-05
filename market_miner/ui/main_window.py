@@ -248,9 +248,8 @@ class MarketMinerGUI:
 
 
     def log(self, message: str, level: str = "info") -> None:
-        """Log message to UI and status bar."""
+        """Log message to UI."""
         self.log_tab.log(message, level)
-        self.progress_tab.progress_var.set(message)
 
         emoji = (
             "🟢" if level == "success" else
@@ -469,6 +468,13 @@ class MarketMinerGUI:
             # Reset UI progress
             self.progress_tab.progress_bar.set(0)
             
+            # Set scraping status
+            if is_multi:
+                self.progress_tab.progress_var.set(f"Scraping {len(server_ids)} servers...")
+            else:
+                server_name = list(server_ids.keys())[0]
+                self.progress_tab.progress_var.set(f"Scraping {server_name}...")
+            
             # Log startup information
             self._log_scrape_start(server_ids, from_id, to_id, max_threads, output_file)
 
@@ -567,7 +573,6 @@ class MarketMinerGUI:
                         # Update progress components individually
                         self.progress_tab.progress_bar.set(progress)
                         self.progress_tab.processed_label.configure(text=f"{processed_jobs}/{current_total}")
-                        self.progress_tab.found_label.configure(text=str(found_items))
                         
                         elapsed = time.time() - start_ts
                         rate = (processed_jobs / elapsed * 60) if elapsed > 0 else 0
@@ -703,8 +708,6 @@ class MarketMinerGUI:
                             processed_jobs / total_jobs)
                         self.progress_tab.processed_label.configure(
                             text=f"{processed_jobs}/{total_jobs}")
-                        self.progress_tab.found_label.configure(
-                            text=str(found_items))
                         self.progress_tab.rate_label.configure(
                             text=f"{rate:.1f}/min")
                         
@@ -716,9 +719,6 @@ class MarketMinerGUI:
                         else:
                             eta_text = "--:--"
                         self.progress_tab.eta_label.configure(text=eta_text)
-                        
-                        self.progress_tab.progress_var.set(
-                            f"Processing item {item_id}...")
 
                     except Exception as e:
                         self.log(
