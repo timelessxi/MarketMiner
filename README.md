@@ -7,28 +7,28 @@ A Python tool for scraping FFXI auction house data from FFXIAH.com. Built this t
 - Scrapes item data from FFXIAH auction house pages
 - Works with single servers or all servers at once  
 - Shows real-time results as it finds items
-- Exports everything to CSV for spreadsheet analysis
-- Has a decent GUI built with CustomTkinter
+- Exports everything to timestamped CSV files
+- Has a clean GUI built with CustomTkinter
 
-## Features
+## Key Features
+
+**Smart Performance:**
+- Multi-threaded scraping (configurable 1-20 threads)
+- Intelligent item validation - skips non-existent items quickly
+- Remembers previously skipped items to avoid re-checking
+- Built-in rate limiting to respect servers
 
 **Data Collection:**
 - Individual item prices and sales data
 - Stack prices for stackable items (12s, 99s)
 - Cross-server price comparisons 
-- Item categories
-- Sales velocity tracking
+- Item categories and sales velocity
 
-**Interface:**
-- Dark theme GUI that doesn't hurt your eyes
-- Real-time progress tracking
+**Modern Interface:**
+- Dark theme GUI with real-time progress tracking
+- Estimated time remaining display
 - Live results table that updates as it scrapes
-- Tabbed interface for progress/results/logs
-
-**Performance:**
-- Multi-threaded scraping (configurable 1-20 threads)
-- Built-in rate limiting so we don't hammer their servers
-- Handles errors and retries automatically
+- Clean tabbed interface: Progress, Results, Cross-Server
 
 ## Installation
 
@@ -57,63 +57,83 @@ Just run it:
 python main.py
 ```
 
-The GUI is pretty straightforward:
+The GUI is straightforward:
 1. Pick your server (or "All Servers" for cross-server analysis)
 2. Set the item ID range you want to scan
-3. Adjust thread count if needed (5-10 works well)
-4. Hit start and watch it go
+3. Adjust thread count if needed (3-5 recommended)
+4. Hit start and watch the progress
 
-Results get saved to a CSV file automatically.
+Results get saved automatically with timestamps.
 
-## Output
+## Output Files
 
-**Single server mode** gives you:
-- Item ID, name, individual price, stack price
+Each run creates unique timestamped files:
+- `items_20250105_143052.csv` - Per-server results
+- `cross_server_items_20250105_143052.csv` - Price comparisons (multi-server only)  
+- `skipped_items.json` - Cumulative log of excluded items
+
+**Single server results include:**
+- Item ID, name, individual/stack prices
 - Sales per day for both individual and stacks  
 - Item category and stackability info
-- Server name
 
-**Cross-server mode** shows:
+**Cross-server analysis shows:**
 - Lowest/highest prices across all servers
 - Which servers have the best/worst prices
 - Average prices and price differences
-- How many servers actually have data
+- Server coverage statistics
 
-## Configuration
+## Performance & Optimization
 
-**Servers:** All the usual suspects - Asura, Bahamut, Carbuncle, etc. Full list of 35+ servers supported (includes inactive servers with old data).
+**Smart Skipping:**
+- Validates items on one server before checking all servers
+- Remembers non-sellable items from previous runs
+- Automatically skips known bad items for faster subsequent runs
 
-**Performance:** Start with 3-5 threads. More isn't always better and might get you rate limited.
+**Recommended Settings:**
+- **Threads**: 3-5 (more isn't always better)
+- **Servers**: Single server for focused analysis, multi-server for price comparison
+- **Ranges**: Start small (1-1000) to get familiar
+
+**Server Notes:**
+- Includes all 35+ FFXI servers (including inactive ones with old data)
+- Cross-server scans take significantly longer
+- Inactive servers may have stale data
 
 ## Dependencies
 
-The usual suspects:
-- `requests` for web scraping
-- `beautifulsoup4` for parsing HTML
-- `customtkinter` for the GUI
-- `pandas` for data handling
-- A few others (see requirements.txt)
+- `requests` - Web scraping
+- `beautifulsoup4` - HTML parsing  
+- `customtkinter` - Modern GUI
+- `pandas` - Data handling
+- `lxml` - Fast parsing
+- `tabulate` - Table formatting
 
 ## Fair Warning
 
 This scrapes data from FFXIAH.com, so:
 - Don't go crazy with the thread count
-- Built-in rate limiting should keep you safe
-- Use it responsibly 
-- Respect their servers and ToS
+- Built-in rate limiting keeps you safe
+- Use it responsibly and respect their servers
+- Follow FFXIAH.com's terms of service
 
 ## Contributing
 
-Found a bug? Want to add a feature? PRs welcome. Just try to keep the code readable.
+Found a bug? Want to add a feature? PRs welcome. Just keep the code readable.
 
-## Issues
+## Troubleshooting
 
-If something breaks, open an issue on GitHub with:
+If something breaks, check:
+- Your internet connection
+- Python version (3.8+ required)
+- Virtual environment is activated
+- All dependencies installed correctly
+
+For bugs, open a GitHub issue with:
 - What you were doing
-- What went wrong  
-- Your Python version
-- Any error messages
+- Error messages
+- Your setup info
 
 ---
 
-Built for the FFXI community. Happy trading!
+**MarketMiner Pro** - Built for the FFXI community. Happy trading!
