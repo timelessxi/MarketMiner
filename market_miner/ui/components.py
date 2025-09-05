@@ -115,7 +115,7 @@ class ConfigurationPanel:
 
         # List the files that will be created
         files_label = ctk.CTkLabel(output_frame, 
-                                  text="• items.csv (per-server results)\n• cross_server_items.csv (price comparisons)\n• skipped_items.json (excluded items)",
+                                  text="• items_YYYYMMDD_HHMMSS.csv (per-server results)\n• cross_server_items_YYYYMMDD_HHMMSS.csv (price comparisons)\n• skipped_items_YYYYMMDD_HHMMSS.json (excluded items)",
                                   font=ctk.CTkFont(size=10), 
                                   text_color=("gray50", "gray60"),
                                   justify="left")
@@ -243,8 +243,9 @@ class ConfigurationPanel:
         return self.selected_servers
     
     def get_output_file(self):
-        """Get the output file - always in output folder"""
-        return "output/items.csv"
+        """Get the output file with timestamp for unique runs"""
+        timestamp = time.strftime('%Y%m%d_%H%M%S')
+        return f"output/items_{timestamp}.csv"
 
 
 

@@ -385,9 +385,10 @@ class MarketMinerGUI:
             max_threads = int(self.config_panel.thread_var.get())
             output_file = self.config_panel.get_output_file().strip() or "items.csv"
 
-            # Skipped items file beside items.csv
+            # Skipped items file with same timestamp as output files
+            base_name = os.path.basename(output_file).replace("items_", "").replace(".csv", "")
             skipped_path = os.path.join(os.path.dirname(
-                output_file) or ".", "skipped_items.json")
+                output_file) or ".", f"skipped_items_{base_name}.json")
 
             def save_skip(item_id, name, reason):
                 """Append/merge one skipped item into skipped_items.json."""
@@ -605,7 +606,9 @@ class MarketMinerGUI:
             # 2) Cross-server comparison (only if multi)
             cmp_file = None
             if is_multi and comparison_data:
-                cmp_file = "output/cross_server_items.csv"
+                # Extract timestamp from output_file to keep filenames consistent
+                base_name = os.path.basename(output_file).replace("items_", "").replace(".csv", "")
+                cmp_file = f"output/cross_server_items_{base_name}.csv"
                 cmp_fields = [
                     "itemid",
                     "name",
