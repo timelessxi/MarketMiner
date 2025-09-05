@@ -4,10 +4,9 @@ venv/
 # Ignore Python bytecode
 __pycache__/
 *.pyc
-
-# Ignore Claude/AI-related files
-.claude/
-.claude
+*.pyo
+*.pyd
+.Python
 
 # Ignore Jupyter notebook checkpoints
 .ipynb_checkpoints/
@@ -16,5 +15,20 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Ignore VSCode settings (optional, uncomment if you want)
-#.vscode/
+# Ignore IDE settings
+.vscode/
+.idea/
+.claude/
+.claude
+*.swp
+*.swo
+
+# Ignore build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Ignore PyInstaller artifacts
+*.manifest
+*.spec

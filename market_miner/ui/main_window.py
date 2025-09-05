@@ -41,7 +41,7 @@ class MarketMinerGUI:
         # --- Root window ---
         # If a root was passed, use it; otherwise create a CTk root.
         self.root: ctk.CTk = root if isinstance(root, ctk.CTk) else ctk.CTk()
-        self.root.title("🎮 MarketMiner Pro")
+        self.root.title("MarketMiner Pro - FFXI Auction House Tool")
         self.root.geometry("1100x800")
         self.root.minsize(900, 600)
 
@@ -98,7 +98,18 @@ class MarketMinerGUI:
             anchor="w",
         )
         self.status.grid(row=1, column=0, columnspan=2,
-                         sticky="ew", padx=20, pady=(0, 20))
+                         sticky="ew", padx=20, pady=(0, 5))
+        
+        # Attribution footer
+        attribution = ctk.CTkLabel(
+            self.root,
+            text="Data sourced from FFXIAH.com | Use responsibly and respect their terms of service",
+            font=ctk.CTkFont(size=10),
+            text_color=("gray50", "gray60"),
+            anchor="center",
+        )
+        attribution.grid(row=2, column=0, columnspan=2,
+                        sticky="ew", padx=20, pady=(0, 20))
 
     def _setup_left_panel(self, left_panel: ctk.CTkFrame) -> None:
         """Controls: title, start/stop, configuration."""
@@ -110,10 +121,16 @@ class MarketMinerGUI:
         title = ctk.CTkLabel(
             title_frame, text="⛏️ MarketMiner Pro", font=ctk.CTkFont(size=20, weight="bold")
         )
-        title.grid(row=0, column=0, columnspan=2, pady=(15, 10))
+        title.grid(row=0, column=0, columnspan=2, pady=(15, 5))
+        
+        subtitle = ctk.CTkLabel(
+            title_frame, text="Final Fantasy XI Auction House Data from FFXIAH.com", 
+            font=ctk.CTkFont(size=11), text_color=("gray50", "gray60")
+        )
+        subtitle.grid(row=1, column=0, columnspan=2, pady=(0, 10))
 
         button_frame = ctk.CTkFrame(title_frame)
-        button_frame.grid(row=1, column=0, columnspan=2, pady=(0, 15))
+        button_frame.grid(row=2, column=0, columnspan=2, pady=(0, 15))
 
         self.start_btn = ctk.CTkButton(
             button_frame,
