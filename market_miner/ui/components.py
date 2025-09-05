@@ -100,9 +100,6 @@ class ConfigurationPanel:
         
 
         # Output information (no selection needed)
-        # ctk.CTkLabel(self.frame, text="Output Files:",
-        #             font=ctk.CTkFont(size=12)).grid(
-        #     row=5, column=0, sticky='w', padx=(20, 10), pady=5)
 
         output_frame = ctk.CTkFrame(self.frame)
         output_frame.grid(row=5, column=1, sticky='ew', padx=(0, 20), pady=(5, 20))
