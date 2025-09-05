@@ -264,6 +264,7 @@ class ProgressTab:
         self.processed_label = None
         self.found_label = None
         self.rate_label = None
+        self.eta_label = None
         self.progress_bar = None
         
     def create(self, tab_frame):
@@ -288,7 +289,7 @@ class ProgressTab:
         # Statistics frame
         stats_frame = ctk.CTkFrame(self.frame)
         stats_frame.pack(fill='x', padx=20, pady=(0, 20))
-        stats_frame.grid_columnconfigure((0, 1, 2), weight=1)
+        stats_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
         
         # Statistics labels
         ctk.CTkLabel(stats_frame, text="Processed", 
@@ -300,6 +301,9 @@ class ProgressTab:
         ctk.CTkLabel(stats_frame, text="Rate", 
                     font=ctk.CTkFont(size=12, weight="bold")).grid(
             row=0, column=2, pady=(15, 5))
+        ctk.CTkLabel(stats_frame, text="ETA", 
+                    font=ctk.CTkFont(size=12, weight="bold")).grid(
+            row=0, column=3, pady=(15, 5))
         
         self.processed_label = ctk.CTkLabel(stats_frame, text="0/0",
                                            font=ctk.CTkFont(size=16))
@@ -312,6 +316,10 @@ class ProgressTab:
         self.rate_label = ctk.CTkLabel(stats_frame, text="0/min",
                                       font=ctk.CTkFont(size=16))
         self.rate_label.grid(row=1, column=2, pady=(0, 15))
+        
+        self.eta_label = ctk.CTkLabel(stats_frame, text="--:--",
+                                     font=ctk.CTkFont(size=16))
+        self.eta_label.grid(row=1, column=3, pady=(0, 15))
         
         return self.frame
 

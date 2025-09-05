@@ -180,6 +180,20 @@ class MarketMinerGUI:
     # Helpers / UI actions
     # -----------------------------
 
+    def _format_eta(self, seconds: float) -> str:
+        """Format ETA in MM:SS or HH:MM:SS format"""
+        if seconds <= 0 or seconds > 86400:  # Cap at 24 hours
+            return "--:--"
+        
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = int(seconds % 60)
+        
+        if hours > 0:
+            return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+        else:
+            return f"{minutes:02d}:{secs:02d}"
+
     def _is_multi_server(self) -> bool:
         """True when 2+ servers are selected."""
         return len(self.config_panel.get_selected_servers()) > 1
@@ -558,6 +572,15 @@ class MarketMinerGUI:
                         elapsed = time.time() - start_ts
                         rate = (processed_jobs / elapsed * 60) if elapsed > 0 else 0
                         self.progress_tab.rate_label.configure(text=f"{rate:.1f}/min")
+                        
+                        # Calculate ETA
+                        remaining_jobs = current_total - processed_jobs
+                        if rate > 0 and remaining_jobs > 0:
+                            eta_seconds = (remaining_jobs / rate) * 60
+                            eta_text = self._format_eta(eta_seconds)
+                        else:
+                            eta_text = "--:--"
+                        self.progress_tab.eta_label.configure(text=eta_text)
                     
                     # Phase 2: Query remaining servers for validated items only
                     remaining_servers = [(sname, sid) for sname, sid in server_ids.items() if sname != val_sname]
@@ -684,6 +707,16 @@ class MarketMinerGUI:
                             text=str(found_items))
                         self.progress_tab.rate_label.configure(
                             text=f"{rate:.1f}/min")
+                        
+                        # Calculate and display ETA
+                        remaining_jobs = total_jobs - processed_jobs
+                        if rate > 0 and remaining_jobs > 0:
+                            eta_seconds = (remaining_jobs / rate) * 60
+                            eta_text = self._format_eta(eta_seconds)
+                        else:
+                            eta_text = "--:--"
+                        self.progress_tab.eta_label.configure(text=eta_text)
+                        
                         self.progress_tab.progress_var.set(
                             f"Processing item {item_id}...")
 
