@@ -115,7 +115,7 @@ class ConfigurationPanel:
 
         # List the files that will be created
         files_label = ctk.CTkLabel(output_frame, 
-                                  text="• items_YYYYMMDD_HHMMSS.csv (per-server results)\n• cross_server_items_YYYYMMDD_HHMMSS.csv (price comparisons)\n• skipped_items_YYYYMMDD_HHMMSS.json (excluded items)",
+                                  text="• items_YYYYMMDD_HHMMSS.csv (per-server results)\n• cross_server_items_YYYYMMDD_HHMMSS.csv (price comparisons)\n• skipped_items.json (excluded items - cumulative)",
                                   font=ctk.CTkFont(size=10), 
                                   text_color=("gray50", "gray60"),
                                   justify="left")
