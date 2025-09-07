@@ -28,7 +28,7 @@ Or download the executable from [Releases](https://github.com/timelessxi/MarketM
 ## Usage
 
 1. Pick your server
-2. Set item ID range to scan
+2. Set item ID range
 3. Hit start and wait
 
 Results save automatically with timestamps so you can compare different runs.
